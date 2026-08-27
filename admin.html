@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración | Más que una cifra</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navegación -->
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <div class="logo-icon">+1</div>
+      <div class="logo-text">Más que <span>una cifra</span></div>
+    </a>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">🏠 Inicio</a></li>
+        <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
+        <li><a href="oacp.html" class="nav-link">🛡️ Portal OACP General</a></li>
+        <li><a href="admin.html" class="nav-link active">⚙️ Panel Admin</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span style="background: #ef4444; color: #fff; padding: 0.3rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700;">
+          SISTEMA: ADMINISTRADOR PRINCIPAL
+        </span>
+        <h1 style="font-family: var(--font-serif); font-size: 2.5rem; margin-top: 0.5rem;">
+          Control Global & Auditoría de Expedientes
+        </h1>
+      </div>
+
+      <div>
+        <button class="btn btn-primary" onclick="exportData()">💾 Exportar BD (JSON)</button>
+      </div>
+    </section>
+
+    <!-- Métricas del Administrador -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="adminTotal">0</div>
+        <div class="stat-label">Registros en Sistema</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="adminVerified" style="color: var(--accent-emerald);">0</div>
+        <div class="stat-label">Verificados Oficialmente</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="adminPending" style="color: var(--accent-rose);">0</div>
+        <div class="stat-label">Pendientes por Aprobar</div>
+      </div>
+    </section>
+
+    <!-- Tabla de Gestión de Expedientes y Verificación -->
+    <section style="margin-bottom: 3rem;">
+      <h2 style="font-family: var(--font-serif); font-size: 1.75rem; margin-bottom: 1rem;">
+        Cola de Verificación & Control de Registros
+      </h2>
+
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Persona</th>
+              <th>Región</th>
+              <th>Estado Actual</th>
+              <th>Acciones de Administrador</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Gestión de Usuarios y Roles -->
+    <section style="background: var(--bg-surface-elevated); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 2rem;">
+      <h2 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--accent-gold); margin-bottom: 1rem;">
+        👥 Roles y Accesos del Sistema
+      </h2>
+
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Email</th>
+              <th>Dependencia</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>admin</strong></td>
+              <td><span style="background: rgba(239,68,68,0.2); color: #ef4444; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold;">ADMIN</span></td>
+              <td>admin@masqueunacifra.gov.co</td>
+              <td>Dirección Tecnológica y de Sistemas</td>
+              <td><span style="color: var(--accent-emerald);">● Activo</span></td>
+            </tr>
+            <tr>
+              <td><strong>oacp_general</strong></td>
+              <td><span style="background: rgba(59,130,246,0.2); color: #3b82f6; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold;">OACP GENERAL</span></td>
+              <td>general@oacp.gov.co</td>
+              <td>Oficina del Alto Comisionado para la Paz</td>
+              <td><span style="color: var(--accent-emerald);">● Activo</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <footer>
+    <p><strong>Panel de Administración</strong> &copy; 2026 — Más que una cifra</p>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script>
+    function renderAdminTable() {
+      const stories = DB.getStories();
+      document.getElementById('adminTotal').innerText = stories.length;
+      document.getElementById('adminVerified').innerText = stories.filter(s => s.estado === 'Verificado').length;
+      document.getElementById('adminPending').innerText = stories.filter(s => s.estado === 'En Proceso').length;
+
+      const tbody = document.getElementById('adminTableBody');
+      tbody.innerHTML = stories.map(s => `
+        <tr>
+          <td><strong style="color: var(--accent-gold);">${s.codigo}</strong></td>
+          <td><strong>${s.nombre}</strong></td>
+          <td>${s.region}</td>
+          <td>
+            <span class="status-badge ${s.estado === 'Verificado' ? 'verified' : 'pending'}">
+              ${s.estado === 'Verificado' ? '✓ Verificado' : '⏳ En Proceso'}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn ${s.estado === 'Verificado' ? 'btn-secondary' : 'btn-success'}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="toggleStatus('${s.codigo}', '${s.estado}')">
+                ${s.estado === 'Verificado' ? 'Cambiar a En Proceso' : '✓ Aprobar & Verificar'}
+              </button>
+              <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="deleteRecord('${s.codigo}')">
+                🗑️ Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleStatus(codigo, estadoActual) {
+      const nuevoEstado = estadoActual === 'Verificado' ? 'En Proceso' : 'Verificado';
+      DB.updateStatus(codigo, nuevoEstado);
+      showToast(`Expediente ${codigo} actualizado a: ${nuevoEstado}`);
+      renderAdminTable();
+    }
+
+    function deleteRecord(codigo) {
+      if (confirm(`¿Confirma la eliminación del expediente ${codigo}?`)) {
+        DB.deleteStory(codigo);
+        showToast(`Expediente ${codigo} eliminado.`);
+        renderAdminTable();
+      }
+    }
+
+    function exportData() {
+      const stories = DB.getStories();
+      const blob = new Blob([JSON.stringify(stories, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mas_que_una_cifra_bd_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      showToast("Base de datos exportada en formato JSON.");
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>⚙️</span> <div>${msg}</div>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    document.addEventListener('DOMContentLoaded', renderAdminTable);
+  </script>
+</body>
+</html>

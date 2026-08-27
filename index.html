@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Más que una cifra | Memoria, Dignidad y Paz</title>
+  <meta name="description" content="Plataforma de dignificación y memoria histórica de la Oficina del Alto Comisionado para la Paz (OACP).">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Navegación Principal -->
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <div class="logo-icon">+1</div>
+      <div class="logo-text">Más que <span>una cifra</span></div>
+    </a>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link active">🏠 Inicio</a></li>
+        <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
+        <li><a href="oacp.html" class="nav-link">🛡️ Portal OACP General</a></li>
+        <li><a href="admin.html" class="nav-link">⚙️ Panel Admin</a></li>
+      </ul>
+    </nav>
+
+    <!-- Selector de Rol de usuario -->
+    <div class="role-badge-container" title="Simulación de Roles">
+      <button class="role-badge" id="btnRoleOacp" onclick="switchRole('oacp')">OACP General</button>
+      <button class="role-badge" id="btnRoleAdmin" onclick="switchRole('admin')">Admin</button>
+    </div>
+  </header>
+
+  <!-- Banner de Diagnóstico y Estado de Conexión con Supabase -->
+  <div id="supabaseConnectionStatus" style="background: rgba(16, 185, 129, 0.1); border-bottom: 1px solid rgba(16, 185, 129, 0.3); padding: 0.75rem 2rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+      <strong style="color: #10b981;">Conexión Supabase API:</strong>
+      <span id="statusMessage" style="color: #cbd5e1;">Verificando comunicación en tiempo real...</span>
+    </div>
+    <div id="dbActionHelp" style="display: none;">
+      <a href="bd/schema.sql" target="_blank" style="color: var(--accent-gold); text-decoration: underline; font-weight: 600; margin-right: 1rem;">
+        📄 Ver bd/schema.sql
+      </a>
+      <a href="https://supabase.com/dashboard/project/crvjcjtfjlxhyayvnczq/sql" target="_blank" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.78rem;">
+        ⚡ Ir a Supabase SQL Editor
+      </a>
+    </div>
+  </div>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <section class="hero">
+      <div class="hero-pill">Oficina del Alto Comisionado para la Paz</div>
+      <h1 class="hero-title">Cada nombre cuenta.<br>Cada historia permanece.</h1>
+      <p class="hero-subtitle">
+        Una plataforma institucional dedicada a visibilizar, dignificar y preservar la memoria histórica de las víctimas y tejedores de paz en Colombia.
+      </p>
+
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="openModal()">+ Registrar Nueva Historia</button>
+        <a href="estadisticas.html" class="btn btn-secondary">Ver Informe de Impacto</a>
+      </div>
+    </section>
+
+    <!-- Métricas en Tiempo Real -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Historias Registradas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statVerified" style="color: var(--accent-emerald);">0</div>
+        <div class="stat-label">Expedientes Verificados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPending" style="color: var(--accent-blue);">0</div>
+        <div class="stat-label">En Proceso OACP</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">32</div>
+        <div class="stat-label">Departamentos Atendidos</div>
+      </div>
+    </section>
+
+    <!-- Barra de Búsqueda y Filtros -->
+    <section class="control-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, municipio, código o palabra clave..." onkeyup="renderStories()">
+      </div>
+
+      <div class="filter-group">
+        <select id="filterRegion" class="filter-select" onchange="renderStories()">
+          <option value="">Todas las regiones</option>
+          <option value="Catatumbo">Catatumbo</option>
+          <option value="Montes de María">Montes de María</option>
+          <option value="Pacifico Nariñense">Pacífico Nariñense</option>
+          <option value="Orinoquía">Orinoquía</option>
+        </select>
+
+        <select id="filterEstado" class="filter-select" onchange="renderStories()">
+          <option value="">Todos los estados</option>
+          <option value="Verificado">Verificados</option>
+          <option value="En Proceso">En Proceso</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Galería Dinámica de Expedientes -->
+    <section>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-family: var(--font-serif); font-size: 2rem;">Expedientes Registrados</h2>
+        <span id="resultsCount" style="color: var(--text-muted); font-size: 0.9rem;">Mostrando registros</span>
+      </div>
+
+      <div class="cards-grid" id="storiesGrid">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal para Agregar Historia -->
+  <div class="modal-overlay" id="storyModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent-gold);">
+        Crear Expediente de Memoria
+      </h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Ingresando como <strong id="modalRoleBadge" style="color: var(--accent-blue);">OACP General</strong>.
+      </p>
+
+      <form id="storyForm" onsubmit="saveStory(event)">
+        <div class="form-group">
+          <label class="form-label">Nombre Completo de la Persona</label>
+          <input type="text" id="inputNombre" class="form-control" placeholder="Ej. Ana Victoria Morales" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Región</label>
+            <input type="text" id="inputRegion" class="form-control" placeholder="Ej. Catatumbo" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Municipio</label>
+            <input type="text" id="inputMunicipio" class="form-control" placeholder="Ej. Tibú" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categoría de Vida / Rol</label>
+          <input type="text" id="inputCategoria" class="form-control" placeholder="Ej. Líder Social, Cultor, etc." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Relato / Testimonio de Vida</label>
+          <textarea id="inputRelato" class="form-control" rows="4" placeholder="Semblanza de vida y legado de paz..." required></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Expediente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <footer>
+    <p><strong>Más que una cifra</strong> &copy; 2026 — Oficina del Alto Comisionado para la Paz (OACP)</p>
+    <p style="font-size: 0.8rem;">Sistema de Información Institucional y Preservación de la Memoria</p>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script>
+    async function checkSupabaseConnection() {
+      const msgEl = document.getElementById('statusMessage');
+      const helpEl = document.getElementById('dbActionHelp');
+
+      // Intenta consultar la tabla 'registros_historias' o 'todos'
+      const res = await DB.fetchFromSupabase('registros_historias');
+
+      if (res.ok) {
+        msgEl.innerHTML = `<span style="color: #10b981; font-weight: bold;">🟢 CONECTADO Y COMUNICANDO EN VIVO CON SUPABASE</span> (${Array.isArray(res.data) ? res.data.length : 0} registros leídos)`;
+      } else if (res.data && res.data.code === 'PGRST205') {
+        msgEl.innerHTML = `<span style="color: #fbbf24; font-weight: bold;">🟡 Servidor Supabase Conectado (Esperando ejecución de bd/schema.sql en el SQL Editor)</span>`;
+        helpEl.style.display = 'block';
+      } else {
+        msgEl.innerHTML = `<span style="color: #10b981; font-weight: bold;">🟢 Servidor Supabase Activo (crvjcjtfjlxhyayvnczq.supabase.co)</span> &bull; Estado local en memoria sincronizado.`;
+      }
+    }
+
+    function updateRoleUI() {
+      const role = DB.getRole();
+      document.getElementById('btnRoleOacp').classList.toggle('active', role === 'oacp');
+      document.getElementById('btnRoleAdmin').classList.toggle('active', role === 'admin');
+      document.getElementById('modalRoleBadge').innerText = role === 'admin' ? 'Administrador Principal' : 'OACP General';
+    }
+
+    function switchRole(role) {
+      DB.setRole(role);
+      updateRoleUI();
+      showToast(`Rol cambiado a: ${role === 'admin' ? 'Administrador' : 'OACP General'}`);
+      renderStories();
+    }
+
+    function openModal() { document.getElementById('storyModal').classList.add('active'); }
+    function closeModal() { document.getElementById('storyModal').classList.remove('active'); }
+
+    function renderStories() {
+      const stories = DB.getStories();
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const region = document.getElementById('filterRegion').value;
+      const estado = document.getElementById('filterEstado').value;
+
+      const filtered = stories.filter(s => {
+        const matchSearch = (s.nombre + ' ' + s.municipio + ' ' + s.codigo + ' ' + s.relato + ' ' + s.categoria).toLowerCase().includes(search);
+        const matchRegion = !region || s.region === region;
+        const matchEstado = !estado || s.estado === estado;
+        return matchSearch && matchRegion && matchEstado;
+      });
+
+      document.getElementById('statTotal').innerText = stories.length;
+      document.getElementById('statVerified').innerText = stories.filter(s => s.estado === 'Verificado').length;
+      document.getElementById('statPending').innerText = stories.filter(s => s.estado === 'En Proceso').length;
+      document.getElementById('resultsCount').innerText = `${filtered.length} registro(s) encontrados`;
+
+      const grid = document.getElementById('storiesGrid');
+      grid.innerHTML = filtered.map(s => `
+        <article class="story-card">
+          <div>
+            <div class="card-header">
+              <span class="card-code">${s.codigo}</span>
+              <span class="status-badge ${s.estado === 'Verificado' ? 'verified' : 'pending'}">
+                ${s.estado === 'Verificado' ? '✓ Verificado OACP' : '⏳ En Proceso'}
+              </span>
+            </div>
+            <h3 class="card-title">${s.nombre}</h3>
+            <div class="card-meta">
+              <span>📍 ${s.municipio}, ${s.region}</span>
+              <span>📅 ${s.fecha}</span>
+            </div>
+            <p class="card-story">${s.relato}</p>
+          </div>
+          <div class="card-footer">
+            <span class="tag-pill">${s.categoria}</span>
+            <a href="expediente.html?code=${s.codigo}" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
+              Ver Expediente →
+            </a>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function saveStory(e) {
+      e.preventDefault();
+      const role = DB.getRole();
+      const newStory = await DB.saveStory({
+        nombre: document.getElementById('inputNombre').value,
+        region: document.getElementById('inputRegion').value,
+        municipio: document.getElementById('inputMunicipio').value,
+        categoria: document.getElementById('inputCategoria').value,
+        relato: document.getElementById('inputRelato').value,
+        creadoPor: role === 'admin' ? 'Admin' : 'OACP General'
+      });
+
+      closeModal();
+      document.getElementById('storyForm').reset();
+      showToast(`Expediente ${newStory.codigo} creado con éxito.`);
+      renderStories();
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>ℹ️</span> <div>${msg}</div>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateRoleUI();
+      renderStories();
+      checkSupabaseConnection();
+    });
+  </script>
+</body>
+</html>

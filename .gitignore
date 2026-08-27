@@ -1,0 +1,17 @@
+# Environment variables (API keys)
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+.next/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+openapi.json
+graphql_schema.json
+*.log

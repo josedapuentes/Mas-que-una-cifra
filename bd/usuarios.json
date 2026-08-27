@@ -1,0 +1,38 @@
+{
+  "proyecto": "Más que una cifra",
+  "descripcion": "Definición de roles y usuarios del sistema de base de datos",
+  "usuarios": [
+    {
+      "usuario_id": "usr_admin_001",
+      "username": "admin",
+      "rol": "admin",
+      "nombre_completo": "Administrador Principal de Plataforma",
+      "email": "admin@masqueunacifra.gov.co",
+      "dependencia": "Dirección Tecnológica y de Sistemas",
+      "permisos": [
+        "GESTION_USUARIOS",
+        "APROBACIONS_FINALES",
+        "ELIMINACION_REGISTROS",
+        "AUDITORIA_COMPLETA",
+        "EXPORTACION_GLOBAL"
+      ],
+      "estado": "Activo"
+    },
+    {
+      "usuario_id": "usr_oacp_002",
+      "username": "oacp_general",
+      "rol": "oacp_general",
+      "nombre_completo": "OACP General",
+      "email": "general@oacp.gov.co",
+      "dependencia": "Oficina del Alto Comisionado para la Paz",
+      "permisos": [
+        "CONSULTA_BASE_DATOS",
+        "CREACION_EXPEDIENTES",
+        "EDICION_REGISTROS_PROPIOS",
+        "GENERACION_REPORTES_INSTITUCIONALES",
+        "CARGA_DOCUMENTAL"
+      ],
+      "estado": "Activo"
+    }
+  ]
+}

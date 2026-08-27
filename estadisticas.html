@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadísticas e Impacto | Más que una cifra</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .progress-bar-bg {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-full);
+      height: 12px;
+      overflow: hidden;
+      margin-top: 0.4rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-hover));
+      border-radius: var(--radius-full);
+      transition: width 0.6s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación -->
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <div class="logo-icon">+1</div>
+      <div class="logo-text">Más que <span>una cifra</span></div>
+    </a>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">🏠 Inicio</a></li>
+        <li><a href="estadisticas.html" class="nav-link active">📊 Estadísticas</a></li>
+        <li><a href="oacp.html" class="nav-link">🛡️ Portal OACP General</a></li>
+        <li><a href="admin.html" class="nav-link">⚙️ Panel Admin</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section style="margin-bottom: 2.5rem; text-align: center;">
+      <h1 style="font-family: var(--font-serif); font-size: 2.8rem;">
+        Informe de Impacto & Métricas Institucionales
+      </h1>
+      <p style="color: var(--text-secondary); max-width: 700px; margin: 0.5rem auto 0;">
+        Consolidación de datos de memoria histórica, dignificación de relatos y cobertura territorial de la Oficina del Alto Comisionado para la Paz.
+      </p>
+    </section>
+
+    <!-- Métricas Generales -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Total Registros Documentados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPercentVerified" style="color: var(--accent-emerald);">0%</div>
+        <div class="stat-label">Tasa de Verificación Institucional</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statRegiones">4</div>
+        <div class="stat-label">Regiones Prioritarias</div>
+      </div>
+    </section>
+
+    <!-- Gráficos y Distribución por Región -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+      
+      <!-- Distribución por Región -->
+      <section style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--accent-gold); margin-bottom: 1.5rem;">
+          📍 Distribución Territorial por Región
+        </h2>
+        <div id="regionProgressContainer">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+      <!-- Distribución por Categoría -->
+      <section style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem;">
+        <h2 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--accent-blue); margin-bottom: 1.5rem;">
+          🏷️ Categorías de Liderazgo & Memoria
+        </h2>
+        <div id="categoryProgressContainer">
+          <!-- Renderizado dinámico -->
+        </div>
+      </section>
+
+    </div>
+
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir Informe Estadístico Oficial</button>
+    </div>
+  </main>
+
+  <footer>
+    <p><strong>Más que una cifra</strong> &copy; 2026 — OACP</p>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const stories = DB.getStories();
+      const total = stories.length || 1;
+      const verifiedCount = stories.filter(s => s.estado === 'Verificado').length;
+      const percent = Math.round((verifiedCount / total) * 100);
+
+      document.getElementById('statTotal').innerText = stories.length;
+      document.getElementById('statPercentVerified').innerText = `${percent}%`;
+
+      // Calcular distribución por regiones
+      const regionCounts = {};
+      stories.forEach(s => {
+        regionCounts[s.region] = (regionCounts[s.region] || 0) + 1;
+      });
+
+      const regionContainer = document.getElementById('regionProgressContainer');
+      regionContainer.innerHTML = Object.entries(regionCounts).map(([region, count]) => {
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+              <span>${region}</span>
+              <span style="color: var(--accent-gold);">${count} expedientes (${pct}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Calcular distribución por categorías
+      const catCounts = {};
+      stories.forEach(s => {
+        catCounts[s.categoria] = (catCounts[s.categoria] || 0) + 1;
+      });
+
+      const catContainer = document.getElementById('categoryProgressContainer');
+      catContainer.innerHTML = Object.entries(catCounts).map(([cat, count]) => {
+        const pct = Math.round((count / total) * 100);
+        return `
+          <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+              <span>${cat}</span>
+              <span style="color: var(--accent-blue);">${count} (${pct}%)</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #3b82f6, #2563eb);"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+  </script>
+</body>
+</html>

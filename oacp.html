@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal OACP General | Más que una cifra</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navegación -->
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <div class="logo-icon">+1</div>
+      <div class="logo-text">Más que <span>una cifra</span></div>
+    </a>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">🏠 Inicio</a></li>
+        <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
+        <li><a href="oacp.html" class="nav-link active">🛡️ Portal OACP General</a></li>
+        <li><a href="admin.html" class="nav-link">⚙️ Panel Admin</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section style="margin-bottom: 2rem;">
+      <span style="background: var(--accent-blue); color: #fff; padding: 0.3rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700;">
+        INSTITUCIONAL: OACP GENERAL
+      </span>
+      <h1 style="font-family: var(--font-serif); font-size: 2.5rem; margin-top: 0.5rem;">
+        Módulo de Ingreso y Seguimiento Institucional
+      </h1>
+      <p style="color: var(--text-secondary); max-width: 800px;">
+        Gestión territorial de expedientes de memoria histórica y documentación para la Oficina del Alto Comisionado para la Paz.
+      </p>
+    </section>
+
+    <!-- Resumen de Métricas OACP -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="oacpTotal">0</div>
+        <div class="stat-label">Total Expedientes OACP</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="oacpVerified" style="color: var(--accent-emerald);">0</div>
+        <div class="stat-label">Verificados por la Mesa</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="oacpPending" style="color: var(--accent-blue);">0</div>
+        <div class="stat-label">En Validación Territorial</div>
+      </div>
+    </section>
+
+    <!-- Formulario de Ingreso Rápido -->
+    <section style="background: var(--bg-surface-elevated); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 3rem;">
+      <h2 style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--accent-gold); margin-bottom: 1rem;">
+        + Registrar Nuevo Expediente Territorial
+      </h2>
+
+      <form id="oacpForm" onsubmit="saveOacpRecord(event)">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label class="form-label">Nombre Completo</label>
+            <input type="text" id="oacpNombre" class="form-control" placeholder="Ej. Jaime Alberto Parra" required>
+          </div>
+          <div>
+            <label class="form-label">Edad</label>
+            <input type="number" id="oacpEdad" class="form-control" placeholder="Ej. 42">
+          </div>
+          <div>
+            <label class="form-label">Región</label>
+            <input type="text" id="oacpRegion" class="form-control" placeholder="Ej. Catatumbo" required>
+          </div>
+          <div>
+            <label class="form-label">Municipio</label>
+            <input type="text" id="oacpMunicipio" class="form-control" placeholder="Ej. Tibú" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <label class="form-label">Categoría</label>
+            <input type="text" id="oacpCategoria" class="form-control" placeholder="Ej. Líder Social" required>
+          </div>
+          <div>
+            <label class="form-label">Resumen del Relato</label>
+            <input type="text" id="oacpRelato" class="form-control" placeholder="Breve reseña del legado o hecho..." required>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <button type="submit" class="btn btn-primary">Registrar en Base de Datos OACP</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Tabla de Registros -->
+    <section>
+      <h2 style="font-family: var(--font-serif); font-size: 1.75rem; margin-bottom: 1rem;">
+        Expedientes en Custodia OACP
+      </h2>
+
+      <div class="data-table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre de la Persona</th>
+              <th>Ubicación</th>
+              <th>Categoría</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="oacpTableBody">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <footer>
+    <p><strong>Oficina del Alto Comisionado para la Paz</strong> &copy; 2026</p>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script>
+    function renderOacpTable() {
+      const stories = DB.getStories();
+      document.getElementById('oacpTotal').innerText = stories.length;
+      document.getElementById('oacpVerified').innerText = stories.filter(s => s.estado === 'Verificado').length;
+      document.getElementById('oacpPending').innerText = stories.filter(s => s.estado === 'En Proceso').length;
+
+      const tbody = document.getElementById('oacpTableBody');
+      tbody.innerHTML = stories.map(s => `
+        <tr>
+          <td><strong style="color: var(--accent-gold);">${s.codigo}</strong></td>
+          <td><strong>${s.nombre}</strong></td>
+          <td>${s.municipio}, ${s.region}</td>
+          <td><span class="tag-pill">${s.categoria}</span></td>
+          <td>
+            <span class="status-badge ${s.estado === 'Verificado' ? 'verified' : 'pending'}">
+              ${s.estado === 'Verificado' ? '✓ Verificado' : '⏳ En Proceso'}
+            </span>
+          </td>
+          <td>
+            <a href="expediente.html?code=${s.codigo}" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+              Ver Expediente
+            </a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function saveOacpRecord(e) {
+      e.preventDefault();
+      const newStory = DB.saveStory({
+        nombre: document.getElementById('oacpNombre').value,
+        edad: document.getElementById('oacpEdad').value,
+        region: document.getElementById('oacpRegion').value,
+        municipio: document.getElementById('oacpMunicipio').value,
+        categoria: document.getElementById('oacpCategoria').value,
+        relato: document.getElementById('oacpRelato').value,
+        creadoPor: 'OACP General'
+      });
+
+      document.getElementById('oacpForm').reset();
+      showToast(`Expediente ${newStory.codigo} registrado exitosamente.`);
+      renderOacpTable();
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>🛡️</span> <div>${msg}</div>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    document.addEventListener('DOMContentLoaded', renderOacpTable);
+  </script>
+</body>
+</html>

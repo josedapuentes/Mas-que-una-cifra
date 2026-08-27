@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <rect x="5" y="10" width="40" height="40" rx="10" fill="url(#goldGrad)" />
+  <text x="25" y="36" font-family="sans-serif" font-weight="900" font-size="20" fill="#000" text-anchor="middle">+1</text>
+  <text x="55" y="32" font-family="sans-serif" font-weight="800" font-size="16" fill="#f8fafc">Más que <tspan fill="#fbbf24">una cifra</tspan></text>
+  <text x="55" y="46" font-family="sans-serif" font-weight="500" font-size="9" fill="#94a3b8">MEMORIA • DIGNIDAD • OACP</text>
+</svg>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expediente de Memoria | Más que una cifra</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .expediente-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      max-width: 900px;
+      margin: 2rem auto;
+      box-shadow: var(--shadow-card);
+    }
+    .badge-seal {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      color: var(--accent-gold);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .timeline-box {
+      border-left: 2px solid var(--accent-gold);
+      padding-left: 1.5rem;
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación -->
+  <header class="navbar">
+    <a href="index.html" class="logo-container">
+      <div class="logo-icon">+1</div>
+      <div class="logo-text">Más que <span>una cifra</span></div>
+    </a>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">← Volver al Registro</a></li>
+        <li><a href="estadisticas.html" class="nav-link">Estadísticas</a></li>
+        <li><a href="oacp.html" class="nav-link">OACP General</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container" id="mainContainer">
+    <!-- Contenido cargado dinámicamente vía Javascript -->
+  </main>
+
+  <footer>
+    <p><strong>Oficina del Alto Comisionado para la Paz (OACP)</strong> — Expediente Digital Oficial</p>
+  </footer>
+
+  <script src="js/db.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code') || "MQUC-2026-001";
+      const story = DB.getStoryByCode(code);
+      const container = document.getElementById("mainContainer");
+
+      if (!story) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 5rem 1rem;">
+            <h2>Expediente no encontrado</h2>
+            <p style="color: var(--text-secondary); margin: 1rem 0;">El código ${code} no corresponde a un registro activo.</p>
+            <a href="index.html" class="btn btn-primary">Volver al Inicio</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <article class="expediente-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem;">
+            <div>
+              <span class="badge-seal">EXPEDIENTE OFICIAL DE MEMORIA</span>
+              <h1 style="font-family: var(--font-serif); font-size: 2.8rem; margin-top: 0.75rem; color: #fff;">${story.nombre}</h1>
+              <p style="color: var(--text-secondary); font-size: 1.1rem; margin-top: 0.25rem;">
+                📍 ${story.municipio}, ${story.region} &nbsp;|&nbsp; 🏷️ ${story.categoria}
+              </p>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-family: monospace; font-size: 1.1rem; color: var(--accent-gold); font-weight: 700; margin-bottom: 0.5rem;">
+                ${story.codigo}
+              </div>
+              <span class="status-badge ${story.estado === 'Verificado' ? 'verified' : 'pending'}" style="font-size: 0.9rem; padding: 0.4rem 1rem;">
+                ${story.estado === 'Verificado' ? '✓ Registro Verificado OACP' : '⏳ En Proceso de Validación'}
+              </span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.25rem; color: var(--accent-gold); margin-bottom: 0.75rem;">Semblanza & Relato de Vida</h3>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              "${story.relato}"
+            </p>
+          </div>
+
+          <div class="timeline-box">
+            <h4 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase;">Información de Contexto & Legado</h4>
+            <p style="font-size: 1rem; color: var(--text-primary); margin-top: 0.5rem;">
+              <strong>Impacto Comunitario:</strong> ${story.impacto || 'Aporte significativo a la convivencia y pacificación territorial.'}
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">
+              Fecha del hecho documentado: <strong>${story.fecha}</strong> &bull; Registrado por: <strong>${story.creadoPor || 'Oficina OACP'}</strong>
+            </p>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; margin-top: 2rem;">
+            <a href="index.html" class="btn btn-secondary">← Volver al Listado</a>
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir Expediente Oficial</button>
+          </div>
+        </article>
+      `;
+    });
+  </script>
+</body>
+</html>
