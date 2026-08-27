@@ -1,147 +1,88 @@
 /* =====================================================================
-   MÓDULO DE INTEGRACIÓN DIRECTA CON SUPABASE REST API & LOCAL STORAGE
+   MÓDULO DE INTEGRACIÓN CON SUPABASE - MÁS QUE UNA CIFRA
    ===================================================================== */
 
 const SUPABASE_URL = "https://crvjcjtfjlxhyayvnczq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_z6TohrCmlskwYgGVCoLDbw_jzePljei";
 
-// Semilla local por defecto
-const INITIAL_STORIES = [
-  {
-    id: "mquc-001",
-    codigo: "MQUC-2026-001",
-    nombre: "María Esperanza Benítez",
-    edad: 48,
-    region: "Catatumbo",
-    municipio: "Tibú",
-    fecha: "2021-05-14",
-    categoria: "Líder Comunitaria",
-    relato: "Promotora de proyectos comunitarios de sustitución de cultivos y tejedora de paz en la vereda Caño Indio.",
-    estado: "Verificado",
-    creadoPor: "OACP General"
-  },
-  {
-    id: "mquc-002",
-    codigo: "MQUC-2026-002",
-    nombre: "Javier Orlando Montes",
-    edad: 32,
-    region: "Montes de María",
-    municipio: "San Jacinto",
-    fecha: "2019-11-03",
-    categoria: "Gestor Cultural",
-    relato: "Músico gaitero y formador tradicional que enseñó a más de 120 jóvenes el arte de la música folclórica como alternativa de vida.",
-    estado: "Verificado",
-    creadoPor: "Admin"
-  },
-  {
-    id: "mquc-003",
-    codigo: "MQUC-2026-003",
-    nombre: "Carmen Alicia Guanga",
-    edad: 55,
-    region: "Pacifico Nariñense",
-    municipio: "Tumaco",
-    fecha: "2022-02-28",
-    categoria: "Defensora del Territorio",
-    relato: "Lideresa étnica afrodescendiente comprometida con la soberanía alimentaria y la preservación ambiental de los manglares.",
-    estado: "En Proceso",
-    creadoPor: "OACP General"
-  }
-];
+// El cliente supabase se inicializa en js/auth.js usando estas constantes
+// Las funciones de DB usan getSupabaseClient() definido en auth.js
 
 const DB = {
-  // Función asíncrona para consultar directamente Supabase en vivo
-  fetchFromSupabase: async (tableName = 'Datos entregas dignas - OACP') => {
+  // Función para leer registros desde Supabase
+  fetchRecords: async (tableName = 'registros_historias') => {
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/${tableName}?select=*`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
-      });
-      const data = await response.json();
-      return { ok: response.ok, status: response.status, data };
+      const sb = getSupabaseClient();
+      const { data, error, status } = await sb
+        .from(tableName)
+        .select(`
+          *,
+          perfil:creado_por ( full_name, role )
+        `)
+        .order('creado_el', { ascending: false });
+      
+      return { ok: !error, status, data: error ? [] : data, error };
     } catch (err) {
       return { ok: false, error: err };
     }
   },
 
-  getStories: () => {
-    const data = localStorage.getItem("MQUC_STORIES");
-    if (!data) {
-      localStorage.setItem("MQUC_STORIES", JSON.stringify(INITIAL_STORIES));
-      return INITIAL_STORIES;
-    }
-    return JSON.parse(data);
+  getStoryByCode: async (codigo) => {
+    const sb = getSupabaseClient();
+    const { data, error } = await sb
+      .from('registros_historias')
+      .select('*')
+      .eq('codigo_registro', codigo)
+      .single();
+    return data;
   },
 
-  getStoryByCode: (codigo) => {
-    const stories = DB.getStories();
-    return stories.find(s => s.codigo === codigo || s.id === codigo);
+  saveStory: async (storyData, profile) => {
+    const sb = getSupabaseClient();
+    const nuevoCodigo = "MQUC-" + new Date().getFullYear() + "-" + String(Math.floor(Math.random() * 9000) + 1000);
+    const estado = profile.role === "admin" ? "Verificado" : "En Proceso";
+
+    const { data, error } = await sb
+      .from('registros_historias')
+      .insert([
+        {
+          codigo_registro: nuevoCodigo,
+          nombre_persona: storyData.nombre,
+          edad: parseInt(storyData.edad) || null,
+          region: storyData.region,
+          municipio: storyData.municipio,
+          fecha_hecho: storyData.fecha || new Date().toISOString().split("T")[0],
+          categoria: storyData.categoria,
+          relato: storyData.relato,
+          estado_verificacion: estado,
+          creado_por: profile.id
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
-  saveStory: async (story) => {
-    const stories = DB.getStories();
-    const newStory = {
-      id: "mquc-" + Date.now(),
-      codigo: "MQUC-2026-" + String(Math.floor(Math.random() * 900) + 100),
-      fecha: new Date().toISOString().split("T")[0],
-      estado: story.creadoPor === "Admin" ? "Verificado" : "En Proceso",
-      ...story
-    };
-    stories.unshift(newStory);
-    localStorage.setItem("MQUC_STORIES", JSON.stringify(stories));
-
-    // Intenta enviar la historia directamente a Supabase vía REST
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/Datos%20entregas%20dignas%20-%20OACP`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          codigo_registro: newStory.codigo,
-          nombre_persona: newStory.nombre,
-          edad: parseInt(newStory.edad) || 0,
-          region: newStory.region,
-          municipio: newStory.municipio,
-          fecha_hecho: newStory.fecha,
-          categoria: newStory.categoria,
-          relato: newStory.relato,
-          estado_verificacion: newStory.estado
-        })
-      });
-    } catch (e) {
-      console.log("Inserción remota Supabase omitida:", e);
-    }
-
-    return newStory;
+  updateStatus: async (id, nuevoEstado) => {
+    const sb = getSupabaseClient();
+    const { data, error } = await sb
+      .from('registros_historias')
+      .update({ estado_verificacion: nuevoEstado })
+      .eq('id', id)
+      .select();
+    
+    return !error;
   },
 
-  updateStatus: (codigo, nuevoEstado) => {
-    const stories = DB.getStories();
-    const index = stories.findIndex(s => s.codigo === codigo);
-    if (index !== -1) {
-      stories[index].estado = nuevoEstado;
-      localStorage.setItem("MQUC_STORIES", JSON.stringify(stories));
-      return true;
-    }
-    return false;
-  },
-
-  deleteStory: (codigo) => {
-    let stories = DB.getStories();
-    stories = stories.filter(s => s.codigo !== codigo);
-    localStorage.setItem("MQUC_STORIES", JSON.stringify(stories));
-  },
-
-  getRole: () => {
-    return localStorage.getItem("MQUC_ROLE") || "oacp";
-  },
-
-  setRole: (role) => {
-    localStorage.setItem("MQUC_ROLE", role);
+  deleteStory: async (id) => {
+    const sb = getSupabaseClient();
+    const { error } = await sb
+      .from('registros_historias')
+      .delete()
+      .eq('id', id);
+    return !error;
   }
 };
+
