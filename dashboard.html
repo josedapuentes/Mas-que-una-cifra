@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Institucional | Más que una cifra</title>
+  <meta name="description" content="Panel de control para gestión de expedientes de memoria.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dashboard-body">
+
+  <div class="dashboard-layout">
+    <!-- Barra Lateral -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo-container">
+          <div class="logo-icon" style="width: 32px; height: 32px; font-size: 0.9rem;">+1</div>
+          <div class="logo-text" style="font-size: 1.1rem;">Más que <span>una cifra</span></div>
+        </a>
+      </div>
+      
+      <div class="user-profile-widget">
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="user-details">
+          <div class="user-name" id="userName">Cargando...</div>
+          <div class="user-role" id="userRole">Cargando rol...</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a href="#" class="sidebar-link" onclick="showSection('records')">📋 Consultar Registros</a></li>
+          <li><a href="#" class="sidebar-link active" onclick="showSection('new_record')">➕ Nuevo Expediente</a></li>
+          <li id="navAdmin" style="display: none;"><a href="#" class="sidebar-link" onclick="showSection('admin_stats')">📈 Estadísticas Globales</a></li>
+        </ul>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary" onclick="logout()" style="width: 100%; border-color: rgba(244, 63, 94, 0.3); color: var(--accent-rose);">
+          🚪 Cerrar Sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="dashboard-content">
+      
+      <!-- Sección: Consultar Registros -->
+      <section id="sec_records" class="dashboard-section">
+        <header class="section-header">
+          <h2>Gestión de Expedientes</h2>
+          <button class="btn btn-primary" onclick="showSection('new_record')">+ Crear Registro</button>
+        </header>
+
+        <div class="control-bar" style="margin-bottom: 1.5rem;">
+          <div class="search-input-wrapper" style="max-width: 400px;">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar expediente..." onkeyup="filterTable()">
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre y Apellido</th>
+                <th>Ubicación</th>
+                <th>Estado</th>
+                <th>Creado por</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  Cargando registros desde Supabase...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Sección: Nuevo Registro -->
+      <section id="sec_new_record" class="dashboard-section active">
+        <header class="section-header">
+          <h2>Registrar Nuevo Expediente</h2>
+          <button class="btn btn-secondary" onclick="showSection('records')">Volver al listado</button>
+        </header>
+
+        <div class="modal-card" style="max-width: 800px; margin: 0 auto; box-shadow: none; border: 1px solid var(--border-subtle);">
+          <form id="recordForm" onsubmit="handleCreateRecord(event)">
+            <div class="form-group">
+              <label class="form-label">Nombre Completo de la Persona</label>
+              <input type="text" id="inputNombre" class="form-control" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Región</label>
+                <input type="text" id="inputRegion" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Municipio</label>
+                <input type="text" id="inputMunicipio" class="form-control" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Edad</label>
+                <input type="number" id="inputEdad" class="form-control">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Fecha de los hechos (o registro)</label>
+                <input type="date" id="inputFecha" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Categoría de Vida / Rol</label>
+              <input type="text" id="inputCategoria" class="form-control" placeholder="Ej. Constructor de Paz" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Relato / Testimonio de Vida</label>
+              <textarea id="inputRelato" class="form-control" rows="5" required></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+              <button type="submit" id="btnSubmitRecord" class="btn btn-primary">Guardar en Base de Datos</button>
+            </div>
+          </form>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    let currentUserProfile = null;
+    let allRecords = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Proteger la ruta y requerir sesión
+      const authData = await AUTH.requireAuth();
+      if (!authData) return;
+      
+      currentUserProfile = authData.profile;
+      
+      // 2. Cargar UI de Perfil
+      document.getElementById('userName').innerText = currentUserProfile.full_name || authData.user.email;
+      const roleName = currentUserProfile.role === 'admin' ? 'Administrador Principal' : 'Enlace OACP General';
+      document.getElementById('userRole').innerText = roleName;
+      document.getElementById('userAvatar').innerText = (currentUserProfile.full_name || authData.user.email).charAt(0).toUpperCase();
+
+      // Mostrar menús de admin si aplica
+      if (currentUserProfile.role === 'admin') {
+        document.getElementById('navAdmin').style.display = 'block';
+      }
+
+      // 3. Cargar tabla de datos
+      loadTableData();
+    });
+
+    function showSection(secId) {
+      document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      
+      document.getElementById('sec_' + secId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    async function loadTableData() {
+      const tbody = document.getElementById('recordsTableBody');
+      const { data, error, ok } = await DB.fetchRecords();
+      
+      if (!ok) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color: var(--accent-rose); text-align: center;">Error al cargar datos: ${error?.message || 'Error desconocido'}</td></tr>`;
+        return;
+      }
+
+      allRecords = data;
+      renderTable(allRecords);
+    }
+
+    function renderTable(records) {
+      const tbody = document.getElementById('recordsTableBody');
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay expedientes registrados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map(r => `
+        <tr>
+          <td><span class="card-code" style="font-size: 0.7rem;">${r.codigo_registro}</span></td>
+          <td style="font-weight: 600;">${r.nombre_persona}</td>
+          <td>${r.municipio}, ${r.region}</td>
+          <td>
+            <span class="status-badge ${r.estado_verificacion === 'Verificado' ? 'verified' : 'pending'}">
+              ${r.estado_verificacion}
+            </span>
+          </td>
+          <td style="font-size: 0.85rem; color: var(--text-secondary);">
+            ${r.perfil ? r.perfil.full_name : 'Usuario Desconocido'}
+          </td>
+          <td>
+            ${currentUserProfile.role === 'admin' ? 
+              `<select onchange="changeStatus('${r.id}', this.value)" style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 4px; padding: 2px;">
+                <option value="En Proceso" ${r.estado_verificacion === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+                <option value="Verificado" ${r.estado_verificacion === 'Verificado' ? 'selected' : ''}>Verificado</option>
+               </select>
+               <button onclick="deleteRecord('${r.id}')" style="background:none; border:none; color: var(--accent-rose); cursor:pointer; margin-left: 8px;">🗑️</button>`
+              : `<span style="font-size: 0.8rem; color: var(--text-muted);">Solo lectura</span>`
+            }
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allRecords.filter(r => 
+        (r.nombre_persona || '').toLowerCase().includes(q) ||
+        (r.codigo_registro || '').toLowerCase().includes(q) ||
+        (r.municipio || '').toLowerCase().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    async function handleCreateRecord(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitRecord');
+      btn.disabled = true;
+      btn.innerText = "Guardando...";
+
+      try {
+        const formData = {
+          nombre: document.getElementById('inputNombre').value,
+          region: document.getElementById('inputRegion').value,
+          municipio: document.getElementById('inputMunicipio').value,
+          edad: document.getElementById('inputEdad').value,
+          fecha: document.getElementById('inputFecha').value,
+          categoria: document.getElementById('inputCategoria').value,
+          relato: document.getElementById('inputRelato').value
+        };
+
+        await DB.saveStory(formData, currentUserProfile);
+        
+        showToast("¡Expediente guardado exitosamente en la base de datos!");
+        document.getElementById('recordForm').reset();
+        
+        // Recargar datos y volver a la tabla
+        await loadTableData();
+        showSection('records');
+
+      } catch (err) {
+        showToast("Error al guardar: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Guardar en Base de Datos";
+      }
+    }
+
+    async function changeStatus(id, newStatus) {
+      const success = await DB.updateStatus(id, newStatus);
+      if (success) {
+        showToast("Estado actualizado.");
+        loadTableData();
+      } else {
+        showToast("Error al actualizar estado.");
+      }
+    }
+
+    async function deleteRecord(id) {
+      if(confirm("¿Estás seguro de eliminar permanentemente este registro de la base de datos?")) {
+        const success = await DB.deleteStory(id);
+        if (success) {
+          showToast("Registro eliminado.");
+          loadTableData();
+        } else {
+          showToast("Error al eliminar.");
+        }
+      }
+    }
+
+    async function logout() {
+      await AUTH.logout();
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>✓</span> <div>${msg}</div>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>
