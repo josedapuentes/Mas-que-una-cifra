@@ -21,15 +21,12 @@
       <ul class="nav-menu">
         <li><a href="index.html" class="nav-link active">🏠 Inicio</a></li>
         <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
-        <li><a href="oacp.html" class="nav-link">🛡️ Portal OACP General</a></li>
-        <li><a href="admin.html" class="nav-link">⚙️ Panel Admin</a></li>
       </ul>
     </nav>
 
-    <!-- Selector de Rol de usuario -->
-    <div class="role-badge-container" title="Simulación de Roles">
-      <button class="role-badge" id="btnRoleOacp" onclick="switchRole('oacp')">OACP General</button>
-      <button class="role-badge" id="btnRoleAdmin" onclick="switchRole('admin')">Admin</button>
+    <!-- Autenticación -->
+    <div class="role-badge-container" id="authContainer">
+      <a href="login.html" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Iniciar Sesión</a>
     </div>
   </header>
 
@@ -176,6 +173,7 @@
   </footer>
 
   <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
   <script>
     async function checkSupabaseConnection() {
       const msgEl = document.getElementById('statusMessage');
@@ -194,21 +192,29 @@
       }
     }
 
-    function updateRoleUI() {
-      const role = DB.getRole();
-      document.getElementById('btnRoleOacp').classList.toggle('active', role === 'oacp');
-      document.getElementById('btnRoleAdmin').classList.toggle('active', role === 'admin');
-      document.getElementById('modalRoleBadge').innerText = role === 'admin' ? 'Administrador Principal' : 'OACP General';
+    async function updateRoleUI() {
+      const session = await AUTH.getSession();
+      const authContainer = document.getElementById('authContainer');
+      
+      if (session) {
+        authContainer.innerHTML = `
+          <span style="color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem;">${session.user.email}</span>
+          <a href="dashboard.html" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ir al Dashboard</a>
+        `;
+      } else {
+        authContainer.innerHTML = `
+          <a href="login.html" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Iniciar Sesión</a>
+        `;
+      }
     }
 
-    function switchRole(role) {
-      DB.setRole(role);
-      updateRoleUI();
-      showToast(`Rol cambiado a: ${role === 'admin' ? 'Administrador' : 'OACP General'}`);
-      renderStories();
+    function openModal() { 
+      // Ahora redirige al login si no está autenticado, o al dashboard
+      AUTH.getSession().then(session => {
+        if(session) window.location.href = 'dashboard.html';
+        else window.location.href = 'login.html';
+      });
     }
-
-    function openModal() { document.getElementById('storyModal').classList.add('active'); }
     function closeModal() { document.getElementById('storyModal').classList.remove('active'); }
 
     function renderStories() {
@@ -258,20 +264,32 @@
 
     async function saveStory(e) {
       e.preventDefault();
-      const role = DB.getRole();
-      const newStory = await DB.saveStory({
-        nombre: document.getElementById('inputNombre').value,
-        region: document.getElementById('inputRegion').value,
-        municipio: document.getElementById('inputMunicipio').value,
-        categoria: document.getElementById('inputCategoria').value,
-        relato: document.getElementById('inputRelato').value,
-        creadoPor: role === 'admin' ? 'Admin' : 'OACP General'
-      });
+      
+      const session = await AUTH.getSession();
+      if (!session) {
+        showToast("Debes iniciar sesión para crear un expediente.");
+        setTimeout(() => window.location.href = 'login.html', 1500);
+        return;
+      }
+      
+      const { data: profile } = await AUTH.getUserProfile(session.user.id);
 
-      closeModal();
-      document.getElementById('storyForm').reset();
-      showToast(`Expediente ${newStory.codigo} creado con éxito.`);
-      renderStories();
+      try {
+        const newStory = await DB.saveStory({
+          nombre: document.getElementById('inputNombre').value,
+          region: document.getElementById('inputRegion').value,
+          municipio: document.getElementById('inputMunicipio').value,
+          categoria: document.getElementById('inputCategoria').value,
+          relato: document.getElementById('inputRelato').value
+        }, profile);
+
+        closeModal();
+        document.getElementById('storyForm').reset();
+        showToast(`Expediente guardado con éxito.`);
+        renderStories();
+      } catch (err) {
+        showToast("Error al guardar: " + err.message);
+      }
     }
 
     function showToast(msg) {
