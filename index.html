@@ -13,108 +13,65 @@
   <!-- Navegación Principal -->
   <header class="navbar">
     <a href="index.html" class="logo-container">
-      <div class="logo-icon">+1</div>
-      <div class="logo-text">Más que <span>una cifra</span></div>
+      <img src="img/hero-ubpd.jpg" alt="Logo UBPD" style="height: 60px; border-radius: 4px; object-fit: cover; width: 100px;">
+      <!-- Usando la imagen subida temporalmente como placeholder para el logo -->
     </a>
 
     <nav>
       <ul class="nav-menu">
-        <li><a href="index.html" class="nav-link active">🏠 Inicio</a></li>
-        <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
+        <li><a href="index.html" class="nav-link">Más que una cifra</a></li>
+        <li class="nav-separator">|</li>
+        <li><a href="historias.html" class="nav-link">Las historias</a></li>
+        <li class="nav-separator">|</li>
+        <li><a href="#" class="nav-link">Sobre la UBPD</a></li>
       </ul>
     </nav>
 
     <!-- Autenticación -->
-    <div class="role-badge-container" id="authContainer">
-      <a href="login.html" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Iniciar Sesión</a>
+    <div id="authContainer">
+      <a href="login.html" class="btn-nav-upload">Carga historias</a>
     </div>
   </header>
-
-  <!-- Banner de Diagnóstico y Estado de Conexión con Supabase -->
-  <div id="supabaseConnectionStatus" style="background: rgba(16, 185, 129, 0.1); border-bottom: 1px solid rgba(16, 185, 129, 0.3); padding: 0.75rem 2rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-      <strong style="color: #10b981;">Conexión Supabase API:</strong>
-      <span id="statusMessage" style="color: #cbd5e1;">Verificando comunicación en tiempo real...</span>
-    </div>
-    <div id="dbActionHelp" style="display: none;">
-      <a href="bd/schema.sql" target="_blank" style="color: var(--accent-gold); text-decoration: underline; font-weight: 600; margin-right: 1rem;">
-        📄 Ver bd/schema.sql
-      </a>
-      <a href="https://supabase.com/dashboard/project/crvjcjtfjlxhyayvnczq/sql" target="_blank" class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.78rem;">
-        ⚡ Ir a Supabase SQL Editor
-      </a>
-    </div>
-  </div>
 
   <main class="container">
     <!-- Hero Banner -->
     <section class="hero">
-      <div class="hero-pill">Unidad de Búsqueda de Personas dadas por Desaparecidas</div>
-      <h1 class="hero-title">Cada nombre cuenta.<br>Cada historia permanece.</h1>
-      <p class="hero-subtitle">
-        Una plataforma institucional dedicada a visibilizar, dignificar y preservar la memoria histórica de las víctimas y tejedores de paz en Colombia.
-      </p>
-
-      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-primary" onclick="openModal()">+ Registrar Nueva Historia</button>
-        <a href="estadisticas.html" class="btn btn-secondary">Ver Informe de Impacto</a>
+      <div class="hero-overlay-box">
+        <h1 class="hero-title">Cada nombre cuenta.<br>Cada historia permanece.</h1>
+        <p class="hero-subtitle">
+          Una plataforma dedicada a visibilizar, dignificar y preservar la memoria de las víctimas de desaparición en Colombia por el conflicto armado.
+        </p>
       </div>
     </section>
 
-    <!-- Métricas en Tiempo Real -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number" id="statTotal">0</div>
-        <div class="stat-label">Historias Registradas</div>
+    <!-- Galería Dinámica de Expedientes (Tabla Figma) -->
+    <section class="list-layout">
+      <div class="list-header-row">
+        <div class="list-header-cell">Nombre de la persona</div>
+        <div class="list-header-cell">Región</div>
+        <div class="list-header-cell">Categoría de vida / Rol</div>
+        <div style="background: transparent;"></div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="statVerified" style="color: var(--accent-emerald);">0</div>
-        <div class="stat-label">Expedientes Verificados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="statPending" style="color: var(--accent-blue);">0</div>
-        <div class="stat-label">En Proceso UBPD</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">32</div>
-        <div class="stat-label">Departamentos Atendidos</div>
-      </div>
-    </section>
-
-    <!-- Barra de Búsqueda y Filtros -->
-    <section class="control-bar">
-      <div class="search-input-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, municipio, código o palabra clave..." onkeyup="renderStories()">
-      </div>
-
-      <div class="filter-group">
-        <select id="filterRegion" class="filter-select" onchange="renderStories()">
-          <option value="">Todas las regiones</option>
-          <option value="Catatumbo">Catatumbo</option>
-          <option value="Montes de María">Montes de María</option>
-          <option value="Pacifico Nariñense">Pacífico Nariñense</option>
-          <option value="Orinoquía">Orinoquía</option>
-        </select>
-
-        <select id="filterEstado" class="filter-select" onchange="renderStories()">
-          <option value="">Todos los estados</option>
-          <option value="Verificado">Verificados</option>
-          <option value="En Proceso">En Proceso</option>
-        </select>
-      </div>
-    </section>
-
-    <!-- Galería Dinámica de Expedientes -->
-    <section>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="font-family: var(--font-serif); font-size: 2rem;">Expedientes Registrados</h2>
-        <span id="resultsCount" style="color: var(--text-muted); font-size: 0.9rem;">Mostrando registros</span>
-      </div>
-
-      <div class="cards-grid" id="storiesGrid">
+      
+      <div id="storiesGrid" style="display: flex; flex-direction: column; gap: 1rem;">
         <!-- Renderizado dinámico vía JS -->
+      </div>
+      
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="historias.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Ver todas las historias</a>
+      </div>
+    </section>
+
+    <!-- Buscador Inferior -->
+    <section style="margin-top: 4rem; margin-bottom: 4rem; display: flex; flex-direction: column; gap: 1rem;">
+      <div style="display: flex; gap: 2rem; align-items: center;">
+        <div style="font-weight: 700; font-size: 1.1rem; max-width: 200px;">¿Buscas la historia puntual de alguien? Ingresa su nombre</div>
+        <div style="flex: 1;">
+          <input type="text" id="searchInput" class="search-input" placeholder="">
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="searchAndRedirect()">Buscar esta historia</button>
       </div>
     </section>
   </main>
@@ -220,46 +177,30 @@
     function renderStories() {
       const stories = DB.getStories();
       const search = document.getElementById('searchInput').value.toLowerCase();
-      const region = document.getElementById('filterRegion').value;
-      const estado = document.getElementById('filterEstado').value;
-
       const filtered = stories.filter(s => {
         const matchSearch = (s.nombre + ' ' + s.municipio + ' ' + s.codigo + ' ' + s.relato + ' ' + s.categoria).toLowerCase().includes(search);
-        const matchRegion = !region || s.region === region;
-        const matchEstado = !estado || s.estado === estado;
-        return matchSearch && matchRegion && matchEstado;
+        return matchSearch;
       });
 
-      document.getElementById('statTotal').innerText = stories.length;
-      document.getElementById('statVerified').innerText = stories.filter(s => s.estado === 'Verificado').length;
-      document.getElementById('statPending').innerText = stories.filter(s => s.estado === 'En Proceso').length;
-      document.getElementById('resultsCount').innerText = `${filtered.length} registro(s) encontrados`;
 
       const grid = document.getElementById('storiesGrid');
-      grid.innerHTML = filtered.map(s => `
-        <article class="story-card">
-          <div>
-            <div class="card-header">
-              <span class="card-code">${s.codigo}</span>
-              <span class="status-badge ${s.estado === 'Verificado' ? 'verified' : 'pending'}">
-                ${s.estado === 'Verificado' ? '✓ Verificado UBPD' : '⏳ En Proceso'}
-              </span>
-            </div>
-            <h3 class="card-title">${s.nombre}</h3>
-            <div class="card-meta">
-              <span>📍 ${s.municipio}, ${s.region}</span>
-              <span>📅 ${s.fecha}</span>
-            </div>
-            <p class="card-story">${s.relato}</p>
-          </div>
-          <div class="card-footer">
-            <span class="tag-pill">${s.categoria}</span>
-            <a href="expediente.html?code=${s.codigo}" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">
-              Ver Expediente →
-            </a>
-          </div>
-        </article>
+      
+      // En el index, solo mostramos 4 como máximo para el home
+      const homeStories = filtered.slice(0, 4);
+      
+      grid.innerHTML = homeStories.map(s => `
+        <div class="list-row">
+          <div class="list-cell">${s.nombre}</div>
+          <div class="list-cell">${s.region}</div>
+          <div class="list-cell">${s.categoria}</div>
+          <a href="expediente.html?code=${s.codigo}" class="btn btn-primary" style="padding: 1rem; border-radius: 0;">Ver su testimonio</a>
+        </div>
       `).join('');
+    }
+    
+    function searchAndRedirect() {
+      const q = document.getElementById('searchInput').value;
+      window.location.href = `historias.html?q=${encodeURIComponent(q)}`;
     }
 
     async function saveStory(e) {

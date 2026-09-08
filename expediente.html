@@ -39,17 +39,21 @@
   <!-- Navegación -->
   <header class="navbar">
     <a href="index.html" class="logo-container">
-      <div class="logo-icon">+1</div>
-      <div class="logo-text">Más que <span>una cifra</span></div>
+      <img src="img/hero-ubpd.jpg" alt="Logo UBPD" style="height: 60px; border-radius: 4px; object-fit: cover; width: 100px;">
     </a>
 
     <nav>
       <ul class="nav-menu">
-        <li><a href="index.html" class="nav-link">← Volver al Registro</a></li>
-        <li><a href="estadisticas.html" class="nav-link">Estadísticas</a></li>
-        <li><a href="oacp.html" class="nav-link">OACP General</a></li>
+        <li><a href="index.html" class="nav-link">Más que una cifra</a></li>
+        <li class="nav-separator">|</li>
+        <li><a href="historias.html" class="nav-link">Las historias</a></li>
+        <li class="nav-separator">|</li>
+        <li><a href="#" class="nav-link">Sobre la UBPD</a></li>
       </ul>
     </nav>
+    <div id="authContainer">
+      <a href="login.html" class="btn-nav-upload">Carga historias</a>
+    </div>
   </header>
 
   <main class="container" id="mainContainer">
@@ -57,7 +61,7 @@
   </main>
 
   <footer>
-    <p><strong>Oficina del Alto Comisionado para la Paz (OACP)</strong> — Expediente Digital Oficial</p>
+    <p><strong>Más que una cifra</strong> &copy; 2026 — Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD)</p>
   </footer>
 
   <script src="js/db.js"></script>
@@ -80,47 +84,45 @@
       }
 
       container.innerHTML = `
-        <article class="expediente-card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.5rem;">
-            <div>
-              <span class="badge-seal">EXPEDIENTE OFICIAL DE MEMORIA</span>
-              <h1 style="font-family: var(--font-serif); font-size: 2.8rem; margin-top: 0.75rem; color: #fff;">${story.nombre}</h1>
-              <p style="color: var(--text-secondary); font-size: 1.1rem; margin-top: 0.25rem;">
-                📍 ${story.municipio}, ${story.region} &nbsp;|&nbsp; 🏷️ ${story.categoria}
-              </p>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-family: monospace; font-size: 1.1rem; color: var(--accent-gold); font-weight: 700; margin-bottom: 0.5rem;">
-                ${story.codigo}
-              </div>
-              <span class="status-badge ${story.estado === 'Verificado' ? 'verified' : 'pending'}" style="font-size: 0.9rem; padding: 0.4rem 1rem;">
-                ${story.estado === 'Verificado' ? '✓ Registro Verificado OACP' : '⏳ En Proceso de Validación'}
-              </span>
-            </div>
+        <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+          <div style="background: #D1D1D1; width: 250px; height: 300px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333;">
+            Fotografía
           </div>
+          <div style="display: flex; align-items: center;">
+            <h1 style="font-family: var(--font-sans); font-size: 3rem; color: #fff; max-width: 500px; line-height: 1.1;">${story.nombre}</h1>
+          </div>
+        </div>
 
-          <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.25rem; color: var(--accent-gold); margin-bottom: 0.75rem;">Semblanza & Relato de Vida</h3>
-            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary); background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-              "${story.relato}"
-            </p>
-          </div>
+        <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Región</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.region}</div>
+          
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Municipio</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.municipio}</div>
+        </div>
 
-          <div class="timeline-box">
-            <h4 style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase;">Información de Contexto & Legado</h4>
-            <p style="font-size: 1rem; color: var(--text-primary); margin-top: 0.5rem;">
-              <strong>Impacto Comunitario:</strong> ${story.impacto || 'Aporte significativo a la convivencia y pacificación territorial.'}
-            </p>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">
-              Fecha del hecho documentado: <strong>${story.fecha}</strong> &bull; Registrado por: <strong>${story.creadoPor || 'Oficina OACP'}</strong>
-            </p>
-          </div>
+        <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Edad</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">-</div>
+          
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Fecha de<br>los hechos</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.fecha}</div>
+        </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; margin-top: 2rem;">
-            <a href="index.html" class="btn btn-secondary">← Volver al Listado</a>
-            <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir Expediente Oficial</button>
-          </div>
-        </article>
+        <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Categoría de<br>Vida / Rol</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.categoria}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: stretch; margin-bottom: 3rem;">
+          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Testimonio</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 200px; white-space: pre-wrap;">${story.relato}</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+          <a href="index.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0;">Ir al inicio</a>
+          <a href="historias.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0;">Ver otras historias</a>
+        </div>
       `;
     });
   </script>
