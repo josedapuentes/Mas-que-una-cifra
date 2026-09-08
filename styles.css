@@ -3,6 +3,7 @@
    ===================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
+:root {
   --bg-primary: #9878BE;
   --bg-surface: rgba(0, 0, 0, 0.15);
   --bg-surface-elevated: #5a3884;
