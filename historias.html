@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Las Historias | Más que una cifra</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -72,12 +72,15 @@
   <script src="js/db.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    function renderStories() {
-      const stories = DB.getStories();
+    async function renderStories() {
+      const res = await DB.fetchRecords();
+      if (!res.ok) return;
+
+      const stories = res.data;
       const search = document.getElementById('searchInput').value.toLowerCase();
 
       const filtered = stories.filter(s => {
-        const matchSearch = (s.nombre + ' ' + s.municipio + ' ' + s.codigo + ' ' + s.relato + ' ' + s.categoria).toLowerCase().includes(search);
+        const matchSearch = (s.nombre_persona + ' ' + s.municipio + ' ' + s.codigo_registro + ' ' + s.relato + ' ' + s.categoria).toLowerCase().includes(search);
         return matchSearch;
       });
 
@@ -85,10 +88,10 @@
       
       grid.innerHTML = filtered.map(s => `
         <div class="list-row">
-          <div class="list-cell">${s.nombre}</div>
+          <div class="list-cell">${s.nombre_persona}</div>
           <div class="list-cell">${s.region}</div>
           <div class="list-cell">${s.categoria}</div>
-          <a href="expediente.html?code=${s.codigo}" class="btn btn-primary" style="padding: 1rem; border-radius: 0;">Ver su testimonio</a>
+          <a href="expediente.html?code=${s.codigo_registro}" class="btn btn-primary" style="padding: 1rem; border-radius: 0;">Ver su testimonio</a>
         </div>
       `).join('');
     }

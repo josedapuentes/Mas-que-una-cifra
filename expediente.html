@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expediente de Memoria | Más que una cifra</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <style>
     .expediente-card {
       background: var(--bg-surface-elevated);
@@ -65,12 +65,19 @@
   </footer>
 
   <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code') || "MQUC-2026-001";
-      const story = DB.getStoryByCode(code);
+      const code = urlParams.get('code');
       const container = document.getElementById("mainContainer");
+      
+      if (!code) {
+        container.innerHTML = `<div style="text-align:center; padding: 5rem;"><a href="index.html" class="btn btn-primary">Volver al Inicio</a></div>`;
+        return;
+      }
+
+      const story = await DB.getStoryByCode(code);
 
       if (!story) {
         container.innerHTML = `
@@ -89,34 +96,34 @@
             Fotografía
           </div>
           <div style="display: flex; align-items: center;">
-            <h1 style="font-family: var(--font-sans); font-size: 3rem; color: #fff; max-width: 500px; line-height: 1.1;">${story.nombre}</h1>
+            <h1 style="font-family: var(--font-sans); font-size: 3rem; color: #fff; max-width: 500px; line-height: 1.1;">${story.nombre_persona}</h1>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Región</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.region}</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.region || ''}</div>
           
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Municipio</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.municipio}</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.municipio || ''}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Edad</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">-</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.edad || '-'}</div>
           
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Fecha de<br>los hechos</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.fecha}</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.fecha_hecho || ''}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Categoría de<br>Vida / Rol</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.categoria}</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.categoria || ''}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: stretch; margin-bottom: 3rem;">
           <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Testimonio</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 200px; white-space: pre-wrap;">${story.relato}</div>
+          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 200px; white-space: pre-wrap;">${story.relato || ''}</div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
