@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Institucional | Más que una cifra</title>
   <meta name="description" content="Panel de control para gestión de expedientes de memoria.">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="dashboard-body">
@@ -156,7 +156,7 @@
       
       // 2. Cargar UI de Perfil
       document.getElementById('userName').innerText = currentUserProfile.full_name || authData.user.email;
-      const roleName = currentUserProfile.role === 'admin' ? 'Administrador Principal' : 'Enlace OACP General';
+      const roleName = currentUserProfile.role === 'admin' ? 'Administrador Principal' : 'Enlace UBPD General';
       document.getElementById('userRole').innerText = roleName;
       document.getElementById('userAvatar').innerText = (currentUserProfile.full_name || authData.user.email).charAt(0).toUpperCase();
 

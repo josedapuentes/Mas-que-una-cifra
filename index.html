@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Más que una cifra | Memoria, Dignidad y Paz</title>
-  <meta name="description" content="Plataforma de dignificación y memoria histórica de la Oficina del Alto Comisionado para la Paz (OACP).">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Plataforma de dignificación y memoria histórica de la Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD).">
+  <link rel="stylesheet" href="styles.css?v=2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -50,7 +50,7 @@
   <main class="container">
     <!-- Hero Banner -->
     <section class="hero">
-      <div class="hero-pill">Oficina del Alto Comisionado para la Paz</div>
+      <div class="hero-pill">Unidad de Búsqueda de Personas dadas por Desaparecidas</div>
       <h1 class="hero-title">Cada nombre cuenta.<br>Cada historia permanece.</h1>
       <p class="hero-subtitle">
         Una plataforma institucional dedicada a visibilizar, dignificar y preservar la memoria histórica de las víctimas y tejedores de paz en Colombia.
@@ -74,7 +74,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-number" id="statPending" style="color: var(--accent-blue);">0</div>
-        <div class="stat-label">En Proceso OACP</div>
+        <div class="stat-label">En Proceso UBPD</div>
       </div>
       <div class="stat-card">
         <div class="stat-number">32</div>
@@ -127,7 +127,7 @@
         Crear Expediente de Memoria
       </h3>
       <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Ingresando como <strong id="modalRoleBadge" style="color: var(--accent-blue);">OACP General</strong>.
+        Ingresando como <strong id="modalRoleBadge" style="color: var(--accent-blue);">UBPD General</strong>.
       </p>
 
       <form id="storyForm" onsubmit="saveStory(event)">
@@ -168,7 +168,7 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <footer>
-    <p><strong>Más que una cifra</strong> &copy; 2026 — Oficina del Alto Comisionado para la Paz (OACP)</p>
+    <p><strong>Más que una cifra</strong> &copy; 2026 — Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD)</p>
     <p style="font-size: 0.8rem;">Sistema de Información Institucional y Preservación de la Memoria</p>
   </footer>
 
@@ -242,7 +242,7 @@
             <div class="card-header">
               <span class="card-code">${s.codigo}</span>
               <span class="status-badge ${s.estado === 'Verificado' ? 'verified' : 'pending'}">
-                ${s.estado === 'Verificado' ? '✓ Verificado OACP' : '⏳ En Proceso'}
+                ${s.estado === 'Verificado' ? '✓ Verificado UBPD' : '⏳ En Proceso'}
               </span>
             </div>
             <h3 class="card-title">${s.nombre}</h3>
