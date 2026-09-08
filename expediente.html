@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expediente de Memoria | Más que una cifra</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
   <style>
     .expediente-card {
       background: var(--bg-surface-elevated);
@@ -91,44 +91,46 @@
       }
 
       container.innerHTML = `
-        <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-          <div style="background: #D1D1D1; width: 250px; height: 300px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333;">
+        <div style="display: flex; gap: 4rem; margin-bottom: 3rem; justify-content: center; align-items: center; padding-top: 2rem;">
+          <div style="background: #D1D1D1; width: 280px; height: 350px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; font-size: 1.2rem;">
             Fotografía
           </div>
-          <div style="display: flex; align-items: center;">
-            <h1 style="font-family: var(--font-sans); font-size: 3rem; color: #fff; max-width: 500px; line-height: 1.1;">${story.nombre_persona}</h1>
+          <div style="display: flex; align-items: center; max-width: 500px;">
+            <h1 style="font-family: var(--font-sans); font-size: 3rem; color: #fff; font-weight: 700; line-height: 1.2;">${story.nombre_persona}</h1>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Región</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.region || ''}</div>
-          
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Municipio</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.municipio || ''}</div>
-        </div>
+        <div style="max-width: 900px; margin: 0 auto;">
+          <div style="display: grid; grid-template-columns: 180px 1fr 180px 1fr; gap: 1.5rem; align-items: center; margin-bottom: 1.5rem;">
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center;">Región</div>
+            <div style="background: #D1D1D1; padding: 1rem; color: #000; min-height: 55px; display: flex; align-items: center;">${story.region || ''}</div>
+            
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center;">Municipio</div>
+            <div style="background: #D1D1D1; padding: 1rem; color: #000; min-height: 55px; display: flex; align-items: center;">${story.municipio || ''}</div>
+          </div>
 
-        <div style="display: grid; grid-template-columns: 200px 1fr 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Edad</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.edad || '-'}</div>
-          
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Fecha de<br>los hechos</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.fecha_hecho || ''}</div>
-        </div>
+          <div style="display: grid; grid-template-columns: 180px 1fr 180px 1fr; gap: 1.5rem; align-items: stretch; margin-bottom: 1.5rem;">
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center; display: flex; align-items: center; justify-content: center;">Edad</div>
+            <div style="background: #D1D1D1; padding: 1rem; color: #000; min-height: 55px; display: flex; align-items: center;">${story.edad || '-'}</div>
+            
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center; line-height: 1.2; display: flex; align-items: center; justify-content: center;">Fecha de<br>los hechos</div>
+            <div style="background: #D1D1D1; padding: 1rem; color: #000; min-height: 55px; display: flex; align-items: center;">${story.fecha_hecho || ''}</div>
+          </div>
 
-        <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: center; margin-bottom: 1rem;">
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center; line-height: 1.2;">Categoría de<br>Vida / Rol</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 50px;">${story.categoria || ''}</div>
-        </div>
+          <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: stretch; margin-bottom: 1.5rem;">
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center; line-height: 1.2; display: flex; align-items: center; justify-content: center;">Categoría de<br>Vida / Rol</div>
+            <div style="background: #D1D1D1; padding: 1rem; color: #000; min-height: 55px; display: flex; align-items: center;">${story.categoria || ''}</div>
+          </div>
 
-        <div style="display: grid; grid-template-columns: 200px 1fr; gap: 1rem; align-items: stretch; margin-bottom: 3rem;">
-          <div style="background: var(--accent-emerald); padding: 1rem; color: white; font-weight: bold; text-align: center;">Testimonio</div>
-          <div style="background: #D1D1D1; padding: 1rem; color: #333; min-height: 200px; white-space: pre-wrap;">${story.relato || ''}</div>
-        </div>
+          <div style="display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem; align-items: stretch; margin-bottom: 4rem;">
+            <div style="background: var(--accent-emerald); padding: 1rem; color: #000; font-weight: 800; text-align: center; display: flex; align-items: center; justify-content: center;">Testimonio</div>
+            <div style="background: #D1D1D1; padding: 1.5rem; color: #000; min-height: 250px; white-space: pre-wrap; line-height: 1.6;">${story.relato || ''}</div>
+          </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
-          <a href="index.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0;">Ir al inicio</a>
-          <a href="historias.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0;">Ver otras historias</a>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <a href="index.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0; color: #000; font-weight: 800; font-size: 1.1rem;">Ir al inicio</a>
+            <a href="historias.html" class="btn btn-primary" style="padding: 1rem 3rem; border-radius: 0; color: #000; font-weight: 800; font-size: 1.1rem;">Ver otras historias</a>
+          </div>
         </div>
       `;
     });
