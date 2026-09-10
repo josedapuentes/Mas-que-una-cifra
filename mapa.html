@@ -17,9 +17,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   
   <style>
-    body {
-      background-color: var(--primary);
-    }
+    /* Removed invalid var(--primary) body override */
     #map {
       width: 100%;
       max-width: 750px;
@@ -109,11 +107,11 @@
     <div style="display: flex; align-items: center; gap: 2rem;">
       <nav>
         <ul class="nav-menu">
-          <li><a href="index.html" class="nav-link" style="color: var(--primary); font-weight: bold;">Inicio</a></li>
-          <li class="nav-separator" style="color: var(--primary);">|</li>
-          <li><a href="historias.html" class="nav-link" style="color: var(--primary); font-weight: bold;">Las historias</a></li>
-          <li class="nav-separator" style="color: var(--primary);">|</li>
-          <li><a href="https://unidadbusqueda.gov.co/acerca-ubpd/" class="nav-link" target="_blank" style="color: var(--primary); font-weight: bold;">Sobre la UBPD</a></li>
+          <li><a href="index.html" class="nav-link" style="color: var(--bg-primary); font-weight: bold;">Inicio</a></li>
+          <li class="nav-separator" style="color: var(--bg-primary);">|</li>
+          <li><a href="historias.html" class="nav-link" style="color: var(--bg-primary); font-weight: bold;">Las historias</a></li>
+          <li class="nav-separator" style="color: var(--bg-primary);">|</li>
+          <li><a href="https://unidadbusqueda.gov.co/acerca-ubpd/" class="nav-link" target="_blank" style="color: var(--bg-primary); font-weight: bold;">Sobre la UBPD</a></li>
         </ul>
       </nav>
       <div id="authContainer">
@@ -211,9 +209,8 @@
       // Setup Map
       map = L.map('map').setView([4.5709, -74.2973], 6);
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 10
       }).addTo(map);
 
