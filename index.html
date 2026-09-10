@@ -61,8 +61,9 @@
         <!-- Renderizado dinámico vía JS -->
       </div>
       
-      <div style="text-align: center; margin-top: 2rem;">
-        <a href="historias.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Ver todas las historias</a>
+      <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+        <a href="historias.html" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 4px; text-decoration: none;">Ver todas las historias</a>
+        <a href="mapa.html" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 4px; text-decoration: none;">Mapa de la memoria</a>
       </div>
     </section>
 
@@ -75,7 +76,7 @@
         </div>
       </div>
       <div style="display: flex; justify-content: flex-end;">
-        <button class="btn btn-primary" onclick="searchAndRedirect()">Buscar esta historia</button>
+        <button class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 4px; cursor: pointer; border: none;" onclick="searchAndRedirect()">Buscar esta historia</button>
       </div>
     </section>
   </main>
@@ -203,7 +204,7 @@
           <div class="list-cell">${s.nombre_persona}</div>
           <div class="list-cell">${s.region}</div>
           <div class="list-cell">${s.categoria}</div>
-          <a href="expediente.html?code=${s.codigo_registro}" class="btn btn-primary" style="padding: 1rem; border-radius: 0;">Ver su testimonio</a>
+          <a href="expediente.html?code=${s.codigo_registro}" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem; border-radius: 0; text-decoration: none;">Ver su testimonio</a>
         </div>
       `).join('');
     }
