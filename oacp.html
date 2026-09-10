@@ -4,25 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal OACP General | Más que una cifra</title>
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
   <!-- Navegación -->
-  <header class="navbar">
-    <a href="index.html" class="logo-container">
-      <div class="logo-icon">+1</div>
-      <div class="logo-text">Más que <span>una cifra</span></div>
+    <header class="navbar">
+    <a href="index.html" class="logo-container" style="display: flex; align-items: center; gap: 1.5rem;">
+      <img src="img/logo-ubpd.png" alt="Logo UBPD" style="height: 60px; object-fit: contain;">
+      <img src="img/logo-mquc.png" alt="Logo Más que una cifra" style="height: 60px; object-fit: contain;">
     </a>
 
-    <nav>
-      <ul class="nav-menu">
-        <li><a href="index.html" class="nav-link">🏠 Inicio</a></li>
-        <li><a href="estadisticas.html" class="nav-link">📊 Estadísticas</a></li>
-        <li><a href="oacp.html" class="nav-link active">🛡️ Portal OACP General</a></li>
-        <li><a href="admin.html" class="nav-link">⚙️ Panel Admin</a></li>
-      </ul>
-    </nav>
+    <div style="display: flex; align-items: center; gap: 2rem;">
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-separator">|</li>
+          <li><a href="historias.html" class="nav-link">Las historias</a></li>
+          <li class="nav-separator">|</li>
+          <li><a href="https://unidadbusqueda.gov.co/acerca-ubpd/" class="nav-link" target="_blank">Sobre la UBPD</a></li>
+        </ul>
+      </nav>
+
+      <!-- Autenticación -->
+      <div id="authContainer">
+        <a href="login.html" class="btn-nav-upload">Carga historias</a>
+      </div>
+    </div>
   </header>
 
   <main class="container">
