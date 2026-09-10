@@ -7,6 +7,7 @@
   <meta name="description" content="Panel de control para gestión de expedientes de memoria.">
   <link rel="stylesheet" href="styles.css?v=10">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dashboard-body">
 
@@ -139,6 +140,31 @@
           </form>
         </div>
       </section>
+
+      <!-- Sección: Estadísticas Globales -->
+      <section id="sec_admin_stats" class="dashboard-section">
+        <header class="section-header">
+          <h2>Estadísticas Globales</h2>
+        </header>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem;">
+          <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); text-align: center;">Expedientes por Región</h3>
+            <canvas id="chartRegion"></canvas>
+          </div>
+          <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); text-align: center;">Expedientes por Municipio</h3>
+            <canvas id="chartMunicipio"></canvas>
+          </div>
+          <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); text-align: center;">Distribución por Rango de Edad</h3>
+            <canvas id="chartEdad"></canvas>
+          </div>
+          <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); text-align: center;">Categoría de Vida / Rol</h3>
+            <canvas id="chartCategoria"></canvas>
+          </div>
+        </div>
+      </section>
       
     </main>
   </div>
@@ -151,6 +177,7 @@
     let currentUserProfile = null;
     let allRecords = [];
     let editingRecordId = null;
+    let chartInstances = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Proteger la ruta y requerir sesión
@@ -208,6 +235,69 @@
 
       allRecords = data;
       renderTable(allRecords);
+
+      if (currentUserProfile && currentUserProfile.role === 'admin') {
+        renderAdminStats(allRecords);
+      }
+    }
+
+    function renderAdminStats(records) {
+      const countBy = (arr, key) => arr.reduce((acc, obj) => {
+        const val = obj[key] || 'No Especificado';
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+      const countAges = (arr) => {
+        const ranges = { 'Menores de 18': 0, '18-30': 0, '31-50': 0, '51-70': 0, 'Mayores de 70': 0, 'No Especificado': 0 };
+        arr.forEach(r => {
+          const e = parseInt(r.edad);
+          if (isNaN(e)) ranges['No Especificado']++;
+          else if (e < 18) ranges['Menores de 18']++;
+          else if (e <= 30) ranges['18-30']++;
+          else if (e <= 50) ranges['31-50']++;
+          else if (e <= 70) ranges['51-70']++;
+          else ranges['Mayores de 70']++;
+        });
+        Object.keys(ranges).forEach(k => { if (ranges[k] === 0) delete ranges[k]; });
+        return ranges;
+      };
+
+      const dataRegion = countBy(records, 'region');
+      const dataMunicipio = countBy(records, 'municipio');
+      const dataEdad = countAges(records);
+      const dataCategoria = countBy(records, 'categoria');
+
+      const createChart = (canvasId, type, dataObj, label, colors) => {
+        if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+        
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        chartInstances[canvasId] = new Chart(ctx, {
+          type: type,
+          data: {
+            labels: Object.keys(dataObj),
+            datasets: [{
+              label: label,
+              data: Object.values(dataObj),
+              backgroundColor: colors,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.5)'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: type !== 'bar' } },
+            scales: type === 'bar' ? { y: { beginAtZero: true, ticks: { precision: 0 } } } : {}
+          }
+        });
+      };
+
+      const brandColors = ['#9878BE', '#39B7B3', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#264653', '#e9c46a'];
+
+      createChart('chartRegion', 'pie', dataRegion, 'Regiones', brandColors);
+      createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
+      createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
+      createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);
     }
 
     function renderTable(records) {
