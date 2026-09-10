@@ -85,6 +85,46 @@ const DB = {
     return data;
   },
 
+  updateStory: async (id, storyData, profile) => {
+    const sb = getSupabaseClient();
+    
+    // Check if there's a new photo to upload
+    let foto_url_update = {};
+    if (storyData.foto && typeof storyData.foto.name === 'string') {
+      const fileExt = storyData.foto.name.split('.').pop();
+      const fileName = `Update_${id}_${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await sb.storage
+        .from('fotos')
+        .upload(fileName, storyData.foto);
+
+      if (!uploadError) {
+        const { data: publicData } = sb.storage
+          .from('fotos')
+          .getPublicUrl(fileName);
+        foto_url_update = { foto_url: publicData.publicUrl };
+      }
+    }
+
+    const { data, error } = await sb
+      .from('registros_historias')
+      .update({
+        nombre_persona: storyData.nombre,
+        edad: parseInt(storyData.edad) || null,
+        region: storyData.region,
+        municipio: storyData.municipio,
+        fecha_hecho: storyData.fecha,
+        categoria: storyData.categoria,
+        relato: storyData.relato,
+        ...foto_url_update
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
   updateStatus: async (id, nuevoEstado) => {
     const sb = getSupabaseClient();
     const { data, error } = await sb

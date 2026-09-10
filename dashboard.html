@@ -85,7 +85,7 @@
       <!-- Sección: Nuevo Registro -->
       <section id="sec_new_record" class="dashboard-section active">
         <header class="section-header">
-          <h2>Registrar Nuevo Expediente</h2>
+          <h2 id="formTitle">Registrar Nuevo Expediente</h2>
           <button class="btn btn-secondary" onclick="showSection('records')">Volver al listado</button>
         </header>
 
@@ -150,6 +150,7 @@
   <script>
     let currentUserProfile = null;
     let allRecords = [];
+    let editingRecordId = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Proteger la ruta y requerir sesión
@@ -178,7 +179,22 @@
       document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
       
       document.getElementById('sec_' + secId).classList.add('active');
-      event.currentTarget.classList.add('active');
+      
+      // Attempt to highlight the sidebar link if called from click
+      if (event && event.currentTarget && event.currentTarget.classList) {
+        event.currentTarget.classList.add('active');
+      }
+
+      if (secId === 'new_record' && !editingRecordId) {
+        resetForm();
+      }
+    }
+
+    function resetForm() {
+      editingRecordId = null;
+      document.getElementById('formTitle').innerText = "Registrar Nuevo Expediente";
+      document.getElementById('btnSubmitRecord').innerText = "Guardar en Base de Datos";
+      document.getElementById('recordForm').reset();
     }
 
     async function loadTableData() {
@@ -215,12 +231,13 @@
             ${r.perfil ? r.perfil.full_name : 'Usuario Desconocido'}
           </td>
           <td>
-            ${currentUserProfile.role === 'admin' ? 
+             ${currentUserProfile.role === 'admin' ? 
               `<select onchange="changeStatus('${r.id}', this.value)" style="background: transparent; border: 1px solid var(--border-subtle); color: var(--text-primary); border-radius: 4px; padding: 2px;">
                 <option value="En Proceso" ${r.estado_verificacion === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
                 <option value="Verificado" ${r.estado_verificacion === 'Verificado' ? 'selected' : ''}>Verificado</option>
                </select>
-               <button onclick="deleteRecord('${r.id}')" style="background:none; border:none; color: var(--accent-rose); cursor:pointer; margin-left: 8px;">🗑️</button>`
+               <button onclick="editRecord('${r.id}')" title="Editar Expediente" style="background:none; border:none; cursor:pointer; margin-left: 8px;">✏️</button>
+               <button onclick="deleteRecord('${r.id}')" title="Eliminar Expediente" style="background:none; border:none; color: var(--accent-rose); cursor:pointer; margin-left: 4px;">🗑️</button>`
               : `<span style="font-size: 0.8rem; color: var(--text-muted);">Solo lectura</span>`
             }
           </td>
@@ -256,10 +273,15 @@
           foto: document.getElementById('inputFoto').files[0]
         };
 
-        await DB.saveStory(formData, currentUserProfile);
+        if (editingRecordId) {
+          await DB.updateStory(editingRecordId, formData, currentUserProfile);
+          showToast("¡Expediente actualizado exitosamente!");
+        } else {
+          await DB.saveStory(formData, currentUserProfile);
+          showToast("¡Expediente guardado exitosamente en la base de datos!");
+        }
         
-        showToast("¡Expediente guardado exitosamente en la base de datos!");
-        document.getElementById('recordForm').reset();
+        resetForm();
         
         // Recargar datos y volver a la tabla
         await loadTableData();
@@ -269,8 +291,29 @@
         showToast("Error al guardar: " + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerText = "Guardar en Base de Datos";
+        btn.innerText = editingRecordId ? "Actualizar Expediente" : "Guardar en Base de Datos";
       }
+    }
+
+    function editRecord(id) {
+      const record = allRecords.find(r => r.id === id);
+      if (!record) return;
+
+      editingRecordId = id;
+      
+      document.getElementById('inputNombre').value = record.nombre_persona || '';
+      document.getElementById('inputRegion').value = record.region || '';
+      document.getElementById('inputMunicipio').value = record.municipio || '';
+      document.getElementById('inputEdad').value = record.edad || '';
+      document.getElementById('inputFecha').value = record.fecha_hecho || '';
+      document.getElementById('inputCategoria').value = record.categoria || '';
+      document.getElementById('inputRelato').value = record.relato || '';
+      // Cannot set input[type=file] value, must leave blank
+
+      document.getElementById('formTitle').innerText = "Editar Expediente: " + record.codigo_registro;
+      document.getElementById('btnSubmitRecord').innerText = "Actualizar Expediente";
+      
+      showSection('new_record');
     }
 
     async function changeStatus(id, newStatus) {
