@@ -129,6 +129,11 @@
               <textarea id="inputRelato" class="form-control" rows="5" required></textarea>
             </div>
 
+            <div class="form-group">
+              <label class="form-label">Fotografía del Perfil (Opcional)</label>
+              <input type="file" id="inputFoto" class="form-control" accept="image/*">
+            </div>
+
             <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
               <button type="submit" id="btnSubmitRecord" class="btn btn-primary">Guardar en Base de Datos</button>
             </div>
@@ -248,7 +253,8 @@
           edad: document.getElementById('inputEdad').value,
           fecha: document.getElementById('inputFecha').value,
           categoria: document.getElementById('inputCategoria').value,
-          relato: document.getElementById('inputRelato').value
+          relato: document.getElementById('inputRelato').value,
+          foto: document.getElementById('inputFoto').files[0]
         };
 
         await DB.saveStory(formData, currentUserProfile);

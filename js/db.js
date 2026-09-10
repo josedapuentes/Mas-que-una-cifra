@@ -42,6 +42,25 @@ const DB = {
     const nuevoCodigo = "MQUC-" + new Date().getFullYear() + "-" + String(Math.floor(Math.random() * 9000) + 1000);
     const estado = profile.role === "admin" ? "Verificado" : "En Proceso";
 
+    let foto_url = storyData.foto_url || null;
+
+    if (storyData.foto && typeof storyData.foto.name === 'string') {
+      const fileExt = storyData.foto.name.split('.').pop();
+      const fileName = `${nuevoCodigo}_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await sb.storage
+        .from('fotos')
+        .upload(filePath, storyData.foto);
+
+      if (!uploadError) {
+        const { data: publicData } = sb.storage
+          .from('fotos')
+          .getPublicUrl(filePath);
+        foto_url = publicData.publicUrl;
+      }
+    }
+
     const { data, error } = await sb
       .from('registros_historias')
       .insert([
@@ -54,6 +73,7 @@ const DB = {
           fecha_hecho: storyData.fecha || new Date().toISOString().split("T")[0],
           categoria: storyData.categoria,
           relato: storyData.relato,
+          foto_url: foto_url,
           estado_verificacion: estado,
           creado_por: profile.id
         }

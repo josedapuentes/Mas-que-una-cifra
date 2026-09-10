@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.registros_historias (
     fecha_hecho DATE NOT NULL,
     categoria VARCHAR(100) NOT NULL, -- e.g., 'Constructor de Paz', 'Líder Social', 'Víctima de Conflicto'
     relato TEXT NOT NULL,
+    foto_url TEXT,
     estado_verificacion VARCHAR(50) DEFAULT 'En Proceso', -- 'Verificado', 'En Proceso', 'Archivado'
     creado_por UUID REFERENCES public.profiles(id),
     creado_el TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
