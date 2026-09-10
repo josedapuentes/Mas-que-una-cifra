@@ -131,19 +131,27 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem;" id="stats-container">
       <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Región</h3>
-        <canvas id="chartRegion"></canvas>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="chartRegion"></canvas>
+        </div>
       </div>
       <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Municipio</h3>
-        <canvas id="chartMunicipio"></canvas>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="chartMunicipio"></canvas>
+        </div>
       </div>
       <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Distribución por Rango de Edad</h3>
-        <canvas id="chartEdad"></canvas>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="chartEdad"></canvas>
+        </div>
       </div>
       <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Categoría de Vida / Rol</h3>
-        <canvas id="chartCategoria"></canvas>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="chartCategoria"></canvas>
+        </div>
       </div>
     </div>
 
@@ -296,6 +304,7 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { 
               legend: { 
                 display: type !== 'bar',
