@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa de la Memoria | Más que una cifra</title>
+  
+  <link rel="stylesheet" href="styles.css?v=11">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <style>
+    body {
+      background-color: var(--primary);
+    }
+    #map {
+      width: 100%;
+      height: 600px;
+      margin: 2rem 0;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: #aadaff; /* Color agua */
+    }
+    
+    /* Pop-up Styles */
+    .leaflet-popup-content-wrapper {
+      background: #F4A261;
+      color: white;
+      border-radius: 0;
+      padding: 0;
+    }
+    .leaflet-popup-tip {
+      background: #F4A261;
+    }
+    .popup-container {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 10px;
+    }
+    .popup-photo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      background: #eee;
+      border: 2px solid white;
+    }
+    .popup-info h4 {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+      font-family: var(--font-sans);
+    }
+    .popup-btn {
+      display: inline-block;
+      background: #39B7B3;
+      color: white !important;
+      text-decoration: none;
+      padding: 8px 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      border: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .popup-btn:hover {
+      background: #2A9D8F;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin: 4rem 0;
+    }
+    .btn-orange {
+      background-color: #F4A261;
+      color: black;
+      font-weight: bold;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      transition: background 0.2s;
+    }
+    .btn-orange:hover {
+      background-color: #e7904f;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navegación Principal -->
+  <header class="navbar" style="background: white;">
+    <a href="index.html" class="logo-container" style="display: flex; align-items: center; gap: 1.5rem;">
+      <img src="img/logo-ubpd.png" alt="Logo UBPD" style="width: 81px; height: 81px; object-fit: contain;">
+      <img src="img/logo-mquc.png" alt="Logo Más que una cifra" style="width: 81px; height: 81px; object-fit: contain;">
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 2rem;">
+      <nav>
+        <ul class="nav-menu">
+          <li><a href="index.html" class="nav-link" style="color: var(--primary); font-weight: bold;">Inicio</a></li>
+          <li class="nav-separator" style="color: var(--primary);">|</li>
+          <li><a href="historias.html" class="nav-link" style="color: var(--primary); font-weight: bold;">Las historias</a></li>
+          <li class="nav-separator" style="color: var(--primary);">|</li>
+          <li><a href="https://unidadbusqueda.gov.co/acerca-ubpd/" class="nav-link" target="_blank" style="color: var(--primary); font-weight: bold;">Sobre la UBPD</a></li>
+        </ul>
+      </nav>
+      <div id="authContainer">
+        <a href="login.html" class="btn-nav-upload">Carga historias</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 1200px; margin-top: 2rem;">
+    
+    <h1 style="text-align: center; color: white; margin: 2rem 0; font-family: var(--font-sans); font-size: 2.5rem;">Mapa de la memoria</h1>
+    
+    <!-- MAPA -->
+    <div id="map"></div>
+    
+    <!-- ESTADÍSTICAS GLOBALES -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem;" id="stats-container">
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+        <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Región</h3>
+        <canvas id="chartRegion"></canvas>
+      </div>
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+        <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Municipio</h3>
+        <canvas id="chartMunicipio"></canvas>
+      </div>
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+        <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Distribución por Rango de Edad</h3>
+        <canvas id="chartEdad"></canvas>
+      </div>
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+        <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Categoría de Vida / Rol</h3>
+        <canvas id="chartCategoria"></canvas>
+      </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="bottom-buttons">
+      <a href="index.html" class="btn-orange">Ir al inicio</a>
+      <a href="historias.html" class="btn-orange">Ver todas las historias</a>
+    </div>
+
+  </main>
+
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // 1. Diccionario de Coordenadas Aproximadas
+    const MOCK_COORDINATES = {
+      'bogota': [4.7110, -74.0721],
+      'engativa': [4.7110, -74.0721],
+      'chaparral': [3.7225, -75.4851],
+      'tolima': [4.0000, -75.2500],
+      'cali': [3.4516, -76.5320],
+      'valle del cauca': [3.8000, -76.5000],
+      'medellin': [6.2442, -75.5812],
+      'antioquia': [6.5333, -75.3167],
+      'popayan': [2.4382, -76.6132],
+      'cauca': [2.5000, -76.8333],
+      'quibdo': [5.6947, -76.6611],
+      'choco': [5.5000, -76.8333]
+    };
+
+    function normalizeString(str) {
+      if (!str) return '';
+      return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    }
+
+    function getApproximateCoordinates(municipio, region) {
+      const normMun = normalizeString(municipio);
+      if (MOCK_COORDINATES[normMun]) return MOCK_COORDINATES[normMun];
+      
+      for (const key in MOCK_COORDINATES) {
+        if (normMun.includes(key)) return MOCK_COORDINATES[key];
+      }
+
+      const normReg = normalizeString(region);
+      if (MOCK_COORDINATES[normReg]) return MOCK_COORDINATES[normReg];
+
+      // Random fallback around central Colombia
+      const latOffset = (Math.random() - 0.5) * 2;
+      const lngOffset = (Math.random() - 0.5) * 2;
+      return [4.5709 + latOffset, -74.2973 + lngOffset]; 
+    }
+
+    let allRecords = [];
+    let chartInstances = {};
+    let map;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Setup Map
+      map = L.map('map').setView([4.5709, -74.2973], 6);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 10
+      }).addTo(map);
+
+      // Load Data
+      const { data, ok } = await DB.fetchRecords();
+      if (ok) {
+        // Public view only gets "Verificado"
+        allRecords = data.filter(r => r.estado_verificacion === 'Verificado');
+        plotMarkers(allRecords);
+        renderGlobalStats(allRecords);
+      }
+    });
+
+    function plotMarkers(records) {
+      records.forEach(r => {
+        const coords = getApproximateCoordinates(r.municipio, r.region);
+        const fotoSrc = r.foto_url || 'https://via.placeholder.com/100x100.png?text=Sin+Foto';
+
+        const marker = L.circleMarker(coords, {
+          radius: 8,
+          fillColor: "#39B7B3",
+          color: "#fff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(map);
+
+        const popupContent = `
+          <div class="popup-container">
+            <img src="${fotoSrc}" alt="Foto" class="popup-photo">
+            <div class="popup-info">
+              <h4>${r.nombre_persona}</h4>
+              <a href="expediente.html?code=${r.codigo_registro}" class="popup-btn">Ver historia</a>
+            </div>
+          </div>
+        `;
+        marker.bindPopup(popupContent, { maxWidth: 400 });
+      });
+    }
+
+    function renderGlobalStats(records) {
+      const countBy = (arr, key) => arr.reduce((acc, obj) => {
+        const val = obj[key] || 'No Especificado';
+        acc[val] = (acc[val] || 0) + 1;
+        return acc;
+      }, {});
+
+      const countAges = (arr) => {
+        const ranges = { 'Menores de 18': 0, '18-30': 0, '31-50': 0, '51-70': 0, 'Mayores de 70': 0, 'No Especificado': 0 };
+        arr.forEach(r => {
+          const e = parseInt(r.edad);
+          if (isNaN(e)) ranges['No Especificado']++;
+          else if (e < 18) ranges['Menores de 18']++;
+          else if (e <= 30) ranges['18-30']++;
+          else if (e <= 50) ranges['31-50']++;
+          else if (e <= 70) ranges['51-70']++;
+          else ranges['Mayores de 70']++;
+        });
+        Object.keys(ranges).forEach(k => { if (ranges[k] === 0) delete ranges[k]; });
+        return ranges;
+      };
+
+      const dataRegion = countBy(records, 'region');
+      const dataMunicipio = countBy(records, 'municipio');
+      const dataEdad = countAges(records);
+      const dataCategoria = countBy(records, 'categoria');
+
+      const createChart = (canvasId, type, dataObj, label, colors) => {
+        if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+        
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        chartInstances[canvasId] = new Chart(ctx, {
+          type: type,
+          data: {
+            labels: Object.keys(dataObj),
+            datasets: [{
+              label: label,
+              data: Object.values(dataObj),
+              backgroundColor: colors,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.2)'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { 
+              legend: { 
+                display: type !== 'bar',
+                labels: { color: '#ffffff', font: { size: 18 } }
+              } 
+            },
+            scales: type === 'bar' ? { 
+              y: { beginAtZero: true, ticks: { precision: 0, color: '#ffffff', font: { size: 18 } } },
+              x: { ticks: { color: '#ffffff', font: { size: 18 } } }
+            } : {}
+          }
+        });
+      };
+
+      const brandColors = ['#9878BE', '#39B7B3', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A'];
+
+      createChart('chartRegion', 'pie', dataRegion, 'Regiones', brandColors);
+      createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
+      createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
+      createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);
+    }
+  </script>
+</body>
+</html>
