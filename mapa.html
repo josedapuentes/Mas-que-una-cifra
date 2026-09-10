@@ -22,8 +22,9 @@
     }
     #map {
       width: 100%;
-      height: 600px;
-      margin: 2rem 0;
+      max-width: 750px;
+      height: 750px;
+      margin: 2rem auto;
       border: 4px solid rgba(255, 255, 255, 0.2);
       border-radius: 8px;
       background: #aadaff; /* Color agua */
@@ -75,9 +76,11 @@
 
     .bottom-buttons {
       display: flex;
-      justify-content: center;
-      gap: 3rem;
-      margin: 4rem 0;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4rem auto;
+      padding: 0 1rem;
+      max-width: 1100px;
     }
     .btn-orange {
       background-color: #F4A261;
@@ -128,19 +131,19 @@
     
     <!-- ESTADÍSTICAS GLOBALES -->
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem;" id="stats-container">
-      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Región</h3>
         <canvas id="chartRegion"></canvas>
       </div>
-      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Municipio</h3>
         <canvas id="chartMunicipio"></canvas>
       </div>
-      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Distribución por Rango de Edad</h3>
         <canvas id="chartEdad"></canvas>
       </div>
-      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Categoría de Vida / Rol</h3>
         <canvas id="chartCategoria"></canvas>
       </div>
@@ -153,6 +156,11 @@
     </div>
 
   </main>
+
+  <footer>
+    <p><strong>Más que una cifra</strong> &copy; 2026 — Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD)</p>
+    <p style="font-size: 0.8rem;">Sistema de Información Institucional y Preservación de la Memoria</p>
+  </footer>
 
   <script src="js/db.js"></script>
   <script src="js/auth.js"></script>
