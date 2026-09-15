@@ -167,12 +167,12 @@
       
       if (session) {
         authContainer.innerHTML = `
-          <span style="color: var(--text-secondary); font-size: 0.85rem; margin-right: 0.5rem;">${session.user.email}</span>
-          <a href="dashboard.html" class="btn btn-secondary" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Ir al Dashboard</a>
+          <span style="color: var(--bg-primary); font-weight: 600; font-size: 0.9rem; margin-right: 1rem;">${session.user.email}</span>
+          <a href="dashboard.html" class="btn" style="background-color: var(--bg-primary); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: bold; border-radius: 4px; text-decoration: none;">Ir al Dashboard</a>
         `;
       } else {
         authContainer.innerHTML = `
-          <a href="login.html" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Iniciar Sesión</a>
+          <a href="login.html" class="btn" style="background-color: var(--bg-primary); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: bold; border-radius: 4px; text-decoration: none;">Iniciar Sesión</a>
         `;
       }
     }
