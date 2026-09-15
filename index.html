@@ -102,12 +102,16 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div class="form-group">
-            <label class="form-label">Región</label>
-            <input type="text" id="inputRegion" class="form-control" placeholder="Ej. Catatumbo" required>
+            <label class="form-label">Región (Departamento)</label>
+            <select id="inputRegion" class="form-control" required>
+              <option value="">Seleccione una región...</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Municipio</label>
-            <input type="text" id="inputMunicipio" class="form-control" placeholder="Ej. Tibú" required>
+            <select id="inputMunicipio" class="form-control" required disabled>
+              <option value="">Seleccione un municipio...</option>
+            </select>
           </div>
         </div>
 
@@ -294,7 +298,53 @@
       updateRoleUI();
       renderStories();
       checkSupabaseConnection();
+      initColombiaDropdowns();
     });
+
+    // Lógica para dropdowns de Región y Municipio
+    let colombiaData = [];
+    function initColombiaDropdowns() {
+      fetch('js/colombia.json')
+        .then(res => res.json())
+        .then(data => {
+          colombiaData = data;
+          const selectRegion = document.getElementById('inputRegion');
+          
+          // Ordenar departamentos alfabéticamente
+          colombiaData.sort((a,b) => a.departamento.localeCompare(b.departamento));
+          
+          colombiaData.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.departamento;
+            opt.textContent = d.departamento;
+            selectRegion.appendChild(opt);
+          });
+        })
+        .catch(err => console.error("Error cargando colombia.json:", err));
+
+      document.getElementById('inputRegion').addEventListener('change', function(e) {
+        const selectMunicipio = document.getElementById('inputMunicipio');
+        selectMunicipio.innerHTML = '<option value="">Seleccione un municipio...</option>';
+        
+        const depName = e.target.value;
+        if (!depName) {
+          selectMunicipio.disabled = true;
+          return;
+        }
+        
+        selectMunicipio.disabled = false;
+        const depData = colombiaData.find(d => d.departamento === depName);
+        if (depData) {
+          const ciudades = depData.ciudades.sort();
+          ciudades.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            selectMunicipio.appendChild(opt);
+          });
+        }
+      });
+    }
   </script>
 </body>
 </html>

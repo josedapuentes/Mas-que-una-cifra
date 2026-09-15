@@ -100,12 +100,16 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="form-group">
-                <label class="form-label">Región</label>
-                <input type="text" id="inputRegion" class="form-control" required>
+                <label class="form-label">Región (Departamento)</label>
+                <select id="inputRegion" class="form-control" required>
+                  <option value="">Seleccione una región...</option>
+                </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Municipio</label>
-                <input type="text" id="inputMunicipio" class="form-control" required>
+                <select id="inputMunicipio" class="form-control" required disabled>
+                  <option value="">Seleccione un municipio...</option>
+                </select>
               </div>
             </div>
 
@@ -191,8 +195,11 @@
     let allRecords = [];
     let editingRecordId = null;
     let chartInstances = {};
+    let colombiaData = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
+      initColombiaDropdowns();
+
       // 1. Proteger la ruta y requerir sesión
       const authData = await AUTH.requireAuth();
       if (!authData) return;
@@ -425,7 +432,12 @@
       editingRecordId = id;
       
       document.getElementById('inputNombre').value = record.nombre_persona || '';
-      document.getElementById('inputRegion').value = record.region || '';
+      
+      const inputRegion = document.getElementById('inputRegion');
+      inputRegion.value = record.region || '';
+      // Trigger change explicitly to load municipalities
+      inputRegion.dispatchEvent(new Event('change'));
+      
       document.getElementById('inputMunicipio').value = record.municipio || '';
       document.getElementById('inputEdad').value = record.edad || '';
       document.getElementById('inputFecha').value = record.fecha_hecho || '';
@@ -473,6 +485,47 @@
       toast.innerHTML = `<span>✓</span> <div>${msg}</div>`;
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
+    }
+    function initColombiaDropdowns() {
+      fetch('js/colombia.json')
+        .then(res => res.json())
+        .then(data => {
+          colombiaData = data;
+          const selectRegion = document.getElementById('inputRegion');
+          
+          colombiaData.sort((a,b) => a.departamento.localeCompare(b.departamento));
+          
+          colombiaData.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.departamento;
+            opt.textContent = d.departamento;
+            selectRegion.appendChild(opt);
+          });
+        })
+        .catch(err => console.error("Error cargando colombia.json:", err));
+
+      document.getElementById('inputRegion').addEventListener('change', function(e) {
+        const selectMunicipio = document.getElementById('inputMunicipio');
+        selectMunicipio.innerHTML = '<option value="">Seleccione un municipio...</option>';
+        
+        const depName = e.target.value;
+        if (!depName) {
+          selectMunicipio.disabled = true;
+          return;
+        }
+        
+        selectMunicipio.disabled = false;
+        const depData = colombiaData.find(d => d.departamento === depName);
+        if (depData) {
+          const ciudades = depData.ciudades.sort();
+          ciudades.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            selectMunicipio.appendChild(opt);
+          });
+        }
+      });
     }
   </script>
 </body>
