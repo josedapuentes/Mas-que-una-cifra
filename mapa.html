@@ -20,12 +20,10 @@
     /* Removed invalid var(--primary) body override */
     #map {
       width: 100%;
-      max-width: 750px;
-      height: 750px;
-      margin: 2rem auto;
-      border: 4px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      background: #aadaff; /* Color agua */
+      height: calc(100vh - 80px); /* Pantalla completa debajo del navbar */
+      margin: 0;
+      border: none;
+      background: var(--bg-primary); /* Fondo del color primario de la app */
     }
     
     /* Pop-up Styles */
@@ -122,15 +120,16 @@
     </div>
   </header>
 
-  <main class="container" style="max-width: 1200px; margin-top: 2rem;">
+  <main style="width: 100%; padding: 0;">
     
-    <h1 style="text-align: center; color: white; margin: 2rem 0; font-family: var(--font-sans); font-size: 2.5rem;">Mapa de la memoria</h1>
+    <!-- El título flotará sobre el mapa -->
+    <h1 style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 400; color: white; font-family: var(--font-sans); font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); pointer-events: none;">Mapa de la memoria</h1>
     
     <!-- MAPA -->
     <div id="map"></div>
     
     <!-- ESTADÍSTICAS GLOBALES -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 2rem; width: 100%; box-sizing: border-box;" id="stats-container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem; width: 100%; box-sizing: border-box;" id="stats-container">
       <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
         <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Expedientes por Región</h3>
         <div style="position: relative; height: 250px; width: 100%;">
@@ -217,12 +216,25 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       // Setup Map
-      map = L.map('map').setView([4.5709, -74.2973], 6);
+      map = L.map('map', { zoomControl: false }).setView([4.5709, -74.2973], 6);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 10
-      }).addTo(map);
+      // Agregamos control de zoom en otra posición
+      L.control.zoom({ position: 'topright' }).addTo(map);
+
+      // Cargar GeoJSON de Colombia
+      fetch('js/colombia.json')
+        .then(response => response.json())
+        .then(geojsonData => {
+          L.geoJSON(geojsonData, {
+            style: {
+              fillColor: '#b59cd1', // Morado suave
+              color: '#ffffff',     // Bordes blancos
+              weight: 1.5,
+              fillOpacity: 1
+            }
+          }).addTo(map);
+        })
+        .catch(err => console.error("Error cargando mapa SVG:", err));
 
       // Load Data
       const { data, ok } = await DB.fetchRecords();
