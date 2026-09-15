@@ -33,6 +33,7 @@
           <li><a href="#" class="sidebar-link" onclick="showSection('records')">📋 Consultar Registros</a></li>
           <li><a href="#" class="sidebar-link active" onclick="showSection('new_record')">➕ Nuevo Expediente</a></li>
           <li id="navAdmin" style="display: none;"><a href="#" class="sidebar-link" onclick="showSection('admin_stats')">📈 Estadísticas Globales</a></li>
+          <li id="navUsers" style="display: none;"><a href="#" class="sidebar-link" onclick="showSection('users')">👥 Gestión de Usuarios</a></li>
         </ul>
       </nav>
       
@@ -182,6 +183,38 @@
           </div>
         </div>
       </section>
+
+      <!-- Sección: Gestión de Usuarios -->
+      <section id="sec_users" class="dashboard-section" style="display: none;">
+        <header class="section-header">
+          <h2>Gestión de Usuarios</h2>
+        </header>
+        <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 2rem; background: rgba(0,0,0,0.15); max-width: 600px;">
+          <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: #ffffff;">Crear Usuario Secundario</h3>
+          <form id="formNewUser" onsubmit="handleCreateUser(event)">
+            <div class="form-grid" style="grid-template-columns: 1fr;">
+              <div class="form-group">
+                <label for="newUsername">Nombre de Usuario</label>
+                <input type="text" id="newUsername" class="form-control" required placeholder="ej: asesor_1">
+              </div>
+              <div class="form-group">
+                <label for="newEmail">Correo Electrónico (opcional)</label>
+                <input type="email" id="newEmail" class="form-control" placeholder="ejemplo@correo.com (Solo para contacto)">
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Contraseña</label>
+                <input type="password" id="newPassword" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
+              </div>
+            </div>
+            
+            <div id="userFeedback" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 4px; font-weight: 600; text-align: center;"></div>
+            
+            <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+              <button type="submit" id="btnCreateUser" class="btn btn-primary">Crear Usuario</button>
+            </div>
+          </form>
+        </div>
+      </section>
       
     </main>
   </div>
@@ -215,6 +248,7 @@
       // Mostrar menús de admin si aplica
       if (currentUserProfile.role === 'admin') {
         document.getElementById('navAdmin').style.display = 'block';
+        document.getElementById('navUsers').style.display = 'block';
       }
 
       // 3. Cargar tabla de datos
@@ -486,6 +520,43 @@
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
     }
+
+    async function handleCreateUser(e) {
+      e.preventDefault();
+      
+      if (currentUserProfile.role !== 'admin') {
+        alert('No tienes permisos para crear usuarios.');
+        return;
+      }
+
+      const btn = document.getElementById('btnCreateUser');
+      const feedback = document.getElementById('userFeedback');
+      const username = document.getElementById('newUsername').value;
+      const email = document.getElementById('newEmail').value || null;
+      const password = document.getElementById('newPassword').value;
+
+      btn.disabled = true;
+      btn.innerText = 'Creando...';
+      feedback.style.display = 'none';
+
+      const res = await AUTH.registerUser(username, email, password);
+
+      btn.disabled = false;
+      btn.innerText = 'Crear Usuario';
+
+      if (res.error) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--accent-rose)';
+        feedback.innerText = 'Error al crear usuario: ' + res.error.message;
+      } else {
+        feedback.style.display = 'block';
+        feedback.style.color = '#10b981'; // green
+        feedback.innerText = 'Usuario secundario creado exitosamente.';
+        document.getElementById('formNewUser').reset();
+        showToast('Usuario creado correctamente');
+      }
+    }
+
     function initColombiaDropdowns() {
       fetch('js/colombia_divipola.json')
         .then(res => res.json())

@@ -24,12 +24,42 @@ function getSupabaseClient() {
 }
 
 const AUTH = {
-  login: async (email, password) => {
+  login: async (emailOrUsername, password) => {
     const sb = getSupabaseClient();
+    
+    // Si no tiene @, asumimos que es un nombre de usuario y le generamos el correo interno
+    let email = emailOrUsername;
+    if (!email.includes('@')) {
+      email = `${emailOrUsername.toLowerCase().trim()}@masqueunacifra.local`;
+    }
+
     return await sb.auth.signInWithPassword({
       email: email,
       password: password
     });
+  },
+
+  registerUser: async (username, realEmail, password) => {
+    // Usamos un cliente secundario para no cerrar la sesión del admin actual
+    const tempSb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { storageKey: 'temp_signup_session', persistSession: false }
+    });
+
+    const internalEmail = `${username.toLowerCase().trim()}@masqueunacifra.local`;
+    
+    const { data, error } = await tempSb.auth.signUp({
+      email: internalEmail,
+      password: password,
+      options: {
+        data: {
+          username: username,
+          real_email: realEmail,
+          role: 'secondary'
+        }
+      }
+    });
+    
+    return { data, error };
   },
 
   logout: async () => {
