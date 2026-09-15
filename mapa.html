@@ -272,6 +272,25 @@
       
       markersGroup = L.layerGroup().addTo(map);
 
+      // Cargar GeoJSON de Suramérica como fondo
+      fetch('js/suramerica.json')
+        .then(response => response.json())
+        .then(surData => {
+          L.geoJSON(surData, {
+            filter: function(feature) {
+              return feature.properties.ADMIN !== "Colombia" && feature.properties.name !== "Colombia";
+            },
+            style: {
+              fillColor: '#7a5a9e', // Morado oscuro (variación del fondo #9878BE)
+              color: '#9878BE',     // Borde igual al fondo o ligeramente más claro
+              weight: 1,
+              fillOpacity: 0.6
+            },
+            interactive: false // No interactivo, sólo fondo
+          }).addTo(map);
+        })
+        .catch(err => console.error("Error cargando Suramérica:", err));
+
       // Cargar GeoJSON de Colombia
       fetch('js/colombia.json')
         .then(response => response.json())
@@ -302,12 +321,15 @@
                   if (searchVal) {
                     e.target.setStyle({ fillColor: '#AADCE0' });
                   }
+                },
+                click: function(e) {
+                  map.fitBounds(e.target.getBounds(), { padding: [30, 30] });
                 }
               });
             }
           }).addTo(map);
           map.invalidateSize();
-          map.fitBounds(geoJsonLayer.getBounds(), { padding: [0, 0] }); // Ajustar la vista automáticamente al tamaño del mapa
+          map.fitBounds(geoJsonLayer.getBounds(), { padding: [30, 30] }); // Ajustar la vista automáticamente al tamaño del mapa
         })
         .catch(err => console.error("Error cargando mapa SVG:", err));
 
@@ -444,7 +466,7 @@
       document.getElementById('mapSearchInput').value = '';
       if (geoJsonLayer) {
         geoJsonLayer.setStyle({ fillColor: '#00908F' });
-        map.fitBounds(geoJsonLayer.getBounds(), { padding: [0, 0] });
+        map.fitBounds(geoJsonLayer.getBounds(), { padding: [30, 30] });
       } else {
         map.setView([4.5709, -74.2973], 5);
       }
