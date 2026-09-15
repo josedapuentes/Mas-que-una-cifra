@@ -111,6 +111,25 @@ const AUTH = {
     return { error };
   },
 
+  updateUserPassword: async (userId, newPassword) => {
+    const sb = getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    
+    // Si el usuario cambia su propia contraseña
+    if (session && session.user && session.user.id === userId) {
+      const { data, error } = await sb.auth.updateUser({ password: newPassword });
+      return { data, error };
+    }
+    
+    // Si un Administrador cambia la contraseña de otro usuario vía RPC
+    const { data, error } = await sb.rpc('admin_update_user_password', {
+      target_user_id: userId,
+      new_password: newPassword
+    });
+    
+    return { data, error };
+  },
+
   logout: async () => {
     const sb = getSupabaseClient();
     const { error } = await sb.auth.signOut();

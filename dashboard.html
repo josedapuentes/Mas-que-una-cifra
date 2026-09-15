@@ -631,9 +631,10 @@
               <span style="background: ${rolColor}22; color: ${rolColor}; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${rolLabel}</span>
             </td>
             <td style="padding: 0.75rem; text-align: center;">
-              ${isCurrentUser ? '<span style="color: var(--text-muted); font-size: 0.8rem;">Tú</span>' : `
+              <button onclick="editPassword('${u.id}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Cambiar Contraseña">🔑</button>
+              ${isCurrentUser ? '<span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 0.25rem;">(Tú)</span>' : `
                 <button onclick="editUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}', '${u.role}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Editar">✏️</button>
-                <button onclick="confirmDeleteUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}') " style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Eliminar">🗑️</button>
+                <button onclick="confirmDeleteUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Eliminar">🗑️</button>
               `}
             </td>
           </tr>
@@ -659,6 +660,47 @@
           <button onclick="loadUsersTable()" style="background: var(--text-muted); color: white; border: none; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; margin: 0 0.15rem;">Cancelar</button>
         </td>
       `;
+    }
+
+    function editPassword(id) {
+      const row = document.getElementById('userRow_' + id);
+      if (!row) return;
+
+      row.innerHTML = `
+        <td colspan="3" style="padding: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-weight: 600; font-size: 0.85rem; color: #ffffff; min-width: 140px;">🔑 Nueva Contraseña:</span>
+            <div style="position: relative; flex: 1; max-width: 350px;">
+              <input type="password" id="pwdInput_${id}" class="form-control" placeholder="Mínimo 6 caracteres" style="padding: 0.4rem; padding-right: 2.5rem; font-size: 0.85rem;" required minlength="6">
+              <button type="button" onclick="togglePasswordVisibility('pwdInput_${id}', this)" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-muted);" title="Ver contraseña">👁️</button>
+            </div>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; text-align: center;">
+          <button onclick="savePassword('${id}')" style="background: #F4A261; color: white; border: none; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; margin: 0 0.15rem; font-weight: 600;">Actualizar</button>
+          <button onclick="loadUsersTable()" style="background: var(--text-muted); color: white; border: none; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; margin: 0 0.15rem;">Cancelar</button>
+        </td>
+      `;
+    }
+
+    async function savePassword(id) {
+      const input = document.getElementById('pwdInput_' + id);
+      const newPassword = input ? input.value.trim() : '';
+
+      if (!newPassword || newPassword.length < 6) {
+        showToast('La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+
+      showToast('Actualizando contraseña...');
+      const { error } = await AUTH.updateUserPassword(id, newPassword);
+
+      if (error) {
+        showToast('Error al cambiar contraseña: ' + (error.message || 'Sin permisos RPC'));
+      } else {
+        showToast('¡Contraseña actualizada exitosamente!');
+        loadUsersTable();
+      }
     }
 
     async function saveUser(id) {

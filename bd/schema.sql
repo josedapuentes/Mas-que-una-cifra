@@ -110,3 +110,27 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_registros_historias_modtime
 BEFORE UPDATE ON public.registros_historias
 FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- =====================================================================
+-- FUNCIÓN RPC PARA CAMBIO DE CONTRASEÑA POR ADMINISTRADOR
+-- =====================================================================
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE OR REPLACE FUNCTION public.admin_update_user_password(target_user_id UUID, new_password TEXT)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  ) THEN
+    RAISE EXCEPTION 'Acceso denegado. Solo administradores pueden realizar esta acción.';
+  END IF;
+
+  UPDATE auth.users
+  SET encrypted_password = crypt(new_password, gen_salt('bf'))
+  WHERE id = target_user_id;
+END;
+$$;
