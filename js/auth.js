@@ -30,18 +30,18 @@ const AUTH = {
     let email = emailOrUsername.trim();
 
     // Si no tiene @, asumimos que es un nombre de usuario
-    // Buscamos su correo real en la tabla profiles
+    // Buscamos su correo real en la tabla profiles por full_name
     if (!email.includes('@')) {
       const { data: profileData } = await sb
         .from('profiles')
         .select('email')
-        .eq('username', email.toLowerCase())
+        .ilike('full_name', email)
         .single();
       
       if (profileData && profileData.email) {
         email = profileData.email;
       } else {
-        return { data: null, error: { message: 'No se encontró un usuario con ese nombre de usuario.' } };
+        return { data: null, error: { message: 'No se encontró un usuario con ese nombre. Intenta con tu correo electrónico.' } };
       }
     }
 
@@ -62,22 +62,20 @@ const AUTH = {
       password: password,
       options: {
         data: {
-          username: username.toLowerCase().trim(),
           full_name: username,
-          role: 'secondary'
+          role: 'oacp_general'
         }
       }
     });
 
-    // Después de crear el usuario, guardamos el username y email en profiles
+    // Después de crear el usuario, guardamos el perfil
     if (!error && data.user) {
       const sb = getSupabaseClient(); // sesión del admin
       await sb.from('profiles').upsert({
         id: data.user.id,
-        username: username.toLowerCase().trim(),
         full_name: username,
         email: realEmail,
-        role: 'secondary'
+        role: 'oacp_general'
       });
     }
     
@@ -106,7 +104,6 @@ const AUTH = {
 
   deleteUser: async (userId) => {
     const sb = getSupabaseClient();
-    // Eliminar perfil (el auth user queda huérfano pero no podrá acceder sin perfil)
     const { error } = await sb
       .from('profiles')
       .delete()

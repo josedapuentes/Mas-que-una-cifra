@@ -228,14 +228,13 @@
               <thead>
                 <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--text-secondary); text-align: left;">
                   <th style="padding: 0.75rem;">Nombre</th>
-                  <th style="padding: 0.75rem;">Usuario</th>
                   <th style="padding: 0.75rem;">Correo</th>
                   <th style="padding: 0.75rem;">Rol</th>
                   <th style="padding: 0.75rem; text-align: center;">Acciones</th>
                 </tr>
               </thead>
               <tbody id="usersTableBody">
-                <tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">Cargando usuarios...</td></tr>
+                <tr><td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">Cargando usuarios...</td></tr>
               </tbody>
             </table>
           </div>
@@ -615,27 +614,26 @@
       const { data: users, error } = await AUTH.getAllUsers();
 
       if (error || !users.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No se encontraron usuarios.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No se encontraron usuarios.</td></tr>';
         return;
       }
 
       tbody.innerHTML = users.map(u => {
         const isCurrentUser = u.id === currentUserProfile.id;
-        const rolLabel = u.role === 'admin' ? 'Administrador' : 'Secundario';
+        const rolLabel = u.role === 'admin' ? 'Administrador' : 'Enlace UBPD';
         const rolColor = u.role === 'admin' ? '#F4A261' : '#10b981';
 
         return `
           <tr style="border-bottom: 1px solid var(--border-subtle);" id="userRow_${u.id}">
             <td style="padding: 0.75rem; color: var(--text-primary);">${u.full_name || '—'}</td>
-            <td style="padding: 0.75rem; color: var(--text-secondary);">${u.username || '—'}</td>
             <td style="padding: 0.75rem; color: var(--text-secondary);">${u.email || '—'}</td>
             <td style="padding: 0.75rem;">
               <span style="background: ${rolColor}22; color: ${rolColor}; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${rolLabel}</span>
             </td>
             <td style="padding: 0.75rem; text-align: center;">
               ${isCurrentUser ? '<span style="color: var(--text-muted); font-size: 0.8rem;">Tú</span>' : `
-                <button onclick="editUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}', '${(u.username || '').replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}', '${u.role}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Editar">✏️</button>
-                <button onclick="confirmDeleteUser('${u.id}', '${(u.full_name || u.username || '').replace(/'/g, "\\'")}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Eliminar">🗑️</button>
+                <button onclick="editUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}', '${u.role}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Editar">✏️</button>
+                <button onclick="confirmDeleteUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}') " style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Eliminar">🗑️</button>
               `}
             </td>
           </tr>
@@ -643,17 +641,16 @@
       }).join('');
     }
 
-    function editUser(id, fullName, username, email, role) {
+    function editUser(id, fullName, email, role) {
       const row = document.getElementById('userRow_' + id);
       if (!row) return;
 
       row.innerHTML = `
         <td style="padding: 0.5rem;"><input type="text" id="editName_${id}" value="${fullName}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
-        <td style="padding: 0.5rem;"><input type="text" id="editUsername_${id}" value="${username}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
         <td style="padding: 0.5rem;"><input type="email" id="editEmail_${id}" value="${email}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
         <td style="padding: 0.5rem;">
           <select id="editRole_${id}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;">
-            <option value="secondary" ${role === 'secondary' ? 'selected' : ''}>Secundario</option>
+            <option value="oacp_general" ${role === 'oacp_general' ? 'selected' : ''}>Enlace UBPD</option>
             <option value="admin" ${role === 'admin' ? 'selected' : ''}>Administrador</option>
           </select>
         </td>
@@ -667,7 +664,6 @@
     async function saveUser(id) {
       const updates = {
         full_name: document.getElementById('editName_' + id).value,
-        username: document.getElementById('editUsername_' + id).value.toLowerCase().trim(),
         email: document.getElementById('editEmail_' + id).value,
         role: document.getElementById('editRole_' + id).value
       };
