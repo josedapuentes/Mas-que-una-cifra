@@ -20,9 +20,10 @@
     /* Removed invalid var(--primary) body override */
     #map {
       width: 100%;
-      height: calc(100vh - 80px); /* Pantalla completa debajo del navbar */
+      height: calc(100vh - 250px);
       margin: 0;
-      border: none;
+      border: 4px solid #F4A261;
+      box-sizing: border-box;
       background: var(--bg-primary); /* Fondo del color primario de la app */
     }
     
@@ -122,8 +123,19 @@
 
   <main style="width: 100%; padding: 0;">
     
-    <!-- El título flotará sobre el mapa -->
-    <h1 style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 400; color: white; font-family: var(--font-sans); font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); pointer-events: none;">Mapa de la memoria</h1>
+    <!-- Intro Text and Search -->
+    <div style="padding: 2rem; background: var(--bg-primary); color: white; text-align: center;">
+      <h1 style="font-family: var(--font-sans); font-size: 2.5rem; margin-bottom: 1rem;">Mapa de la memoria</h1>
+      <p style="max-width: 800px; margin: 0 auto 2rem auto; font-size: 1.1rem; line-height: 1.6;">
+        En este mapa interactivo podrás conocer cada una de la entregas dignas o los reencuentros que la Unidad de Búsqueda ha propiciado desde su creación. Cada punto simboliza una historia, una familia que supo lo ocurrido con su ser querido ausente. Un alivio a un dolor provocado por la desaparición.
+      </p>
+      
+      <div style="display: flex; justify-content: center; gap: 1rem; align-items: center;">
+        <input type="text" id="mapSearchInput" placeholder="Buscar perfil por nombre..." style="padding: 0.75rem; width: 300px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem;">
+        <button class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; border: none; font-size: 1rem;" onclick="searchMapProfile()">Buscar</button>
+        <button class="btn" style="background-color: #ccc; color: black; font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; border: none; font-size: 1rem;" onclick="clearMapSearch()">Limpiar</button>
+      </div>
+    </div>
     
     <!-- MAPA -->
     <div id="map"></div>
@@ -213,21 +225,29 @@
     let allRecords = [];
     let chartInstances = {};
     let map;
+    let geoJsonLayer;
+    let markersGroup;
 
     document.addEventListener('DOMContentLoaded', async () => {
       // Setup Map
-      map = L.map('map', { zoomControl: false }).setView([4.5709, -74.2973], 6);
+      map = L.map('map', { 
+        zoomControl: false,
+        scrollWheelZoom: false,
+        dragging: false
+      }).setView([4.5709, -74.2973], 6);
 
       // Agregamos control de zoom en otra posición
       L.control.zoom({ position: 'topright' }).addTo(map);
+      
+      markersGroup = L.layerGroup().addTo(map);
 
       // Cargar GeoJSON de Colombia
       fetch('js/colombia.json')
         .then(response => response.json())
         .then(geojsonData => {
-          L.geoJSON(geojsonData, {
+          geoJsonLayer = L.geoJSON(geojsonData, {
             style: {
-              fillColor: '#b59cd1', // Morado suave
+              fillColor: '#00908F', // Color turquesa solicitado
               color: '#ffffff',     // Bordes blancos
               weight: 1.5,
               fillOpacity: 1
@@ -246,19 +266,20 @@
       }
     });
 
-    function plotMarkers(records) {
+    function plotMarkers(records, highlight = false) {
+      markersGroup.clearLayers();
       records.forEach(r => {
         const coords = getApproximateCoordinates(r.municipio, r.region);
         const fotoSrc = r.foto_url || 'https://via.placeholder.com/100x100.png?text=Sin+Foto';
 
         const marker = L.circleMarker(coords, {
-          radius: 8,
-          fillColor: "#39B7B3",
-          color: "#fff",
-          weight: 2,
+          radius: highlight ? 12 : 8,
+          fillColor: highlight ? "#F4A261" : "#39B7B3",
+          color: highlight ? "#fff" : "#fff",
+          weight: highlight ? 4 : 2,
           opacity: 1,
           fillOpacity: 0.9
-        }).addTo(map);
+        }).addTo(markersGroup);
 
         const popupContent = `
           <div class="popup-container">
@@ -339,6 +360,32 @@
       createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
       createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
       createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);
+    }
+    function searchMapProfile() {
+      const query = document.getElementById('mapSearchInput').value.toLowerCase().trim();
+      if (!query) return clearMapSearch();
+
+      const matched = allRecords.filter(r => r.nombre_persona && r.nombre_persona.toLowerCase().includes(query));
+      
+      if (geoJsonLayer) {
+        geoJsonLayer.setStyle({ fillColor: '#000000' });
+      }
+      
+      plotMarkers(matched, true);
+      
+      if (matched.length > 0) {
+        const coords = getApproximateCoordinates(matched[0].municipio, matched[0].region);
+        map.setView(coords, 7);
+      }
+    }
+
+    function clearMapSearch() {
+      document.getElementById('mapSearchInput').value = '';
+      if (geoJsonLayer) {
+        geoJsonLayer.setStyle({ fillColor: '#00908F' });
+      }
+      map.setView([4.5709, -74.2973], 6);
+      plotMarkers(allRecords, false);
     }
   </script>
 </body>
