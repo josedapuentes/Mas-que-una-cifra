@@ -67,6 +67,7 @@
                 <th>Código</th>
                 <th>Nombre y Apellido</th>
                 <th>Ubicación</th>
+                <th>Tipo de caso</th>
                 <th>Estado</th>
                 <th>Creado por</th>
                 <th>Acciones</th>
@@ -74,7 +75,7 @@
             </thead>
             <tbody id="recordsTableBody">
               <tr>
-                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
                   Cargando registros desde Supabase...
                 </td>
               </tr>
@@ -125,6 +126,14 @@
             </div>
 
             <div class="form-group">
+              <label class="form-label">Tipo de caso</label>
+              <select id="inputTipoCaso" class="form-control" required>
+                <option value="Entrega digna">Entrega digna</option>
+                <option value="Reencuentro">Reencuentro</option>
+              </select>
+            </div>
+
+            <div class="form-group">
               <label class="form-label">Relato / Testimonio de Vida</label>
               <textarea id="inputRelato" class="form-control" rows="5" required></textarea>
             </div>
@@ -162,6 +171,10 @@
           <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
             <h3 style="font-size: 18px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Categoría de Vida / Rol</h3>
             <canvas id="chartCategoria"></canvas>
+          </div>
+          <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: rgba(0,0,0,0.15);">
+            <h3 style="font-size: 18px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Tipo de caso</h3>
+            <canvas id="chartTipoCaso"></canvas>
           </div>
         </div>
       </section>
@@ -267,6 +280,7 @@
       const dataMunicipio = countBy(records, 'municipio');
       const dataEdad = countAges(records);
       const dataCategoria = countBy(records, 'categoria');
+      const dataTipoCaso = countBy(records, 'tipo_caso');
 
       const createChart = (canvasId, type, dataObj, label, colors) => {
         if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
@@ -314,12 +328,13 @@
       createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
       createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
       createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);
+      createChart('chartTipoCaso', 'pie', dataTipoCaso, 'Tipo de caso', brandColors);
     }
 
     function renderTable(records) {
       const tbody = document.getElementById('recordsTableBody');
       if (records.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay expedientes registrados.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No hay expedientes registrados.</td></tr>`;
         return;
       }
 
@@ -328,6 +343,7 @@
           <td><span class="card-code" style="font-size: 0.7rem;">${r.codigo_registro}</span></td>
           <td style="font-weight: 600;">${r.nombre_persona}</td>
           <td>${r.municipio}, ${r.region}</td>
+          <td>${r.tipo_caso || 'N/A'}</td>
           <td>
             <span class="status-badge ${r.estado_verificacion === 'Verificado' ? 'verified' : 'pending'}">
               ${r.estado_verificacion}
@@ -375,6 +391,7 @@
           edad: document.getElementById('inputEdad').value,
           fecha: document.getElementById('inputFecha').value,
           categoria: document.getElementById('inputCategoria').value,
+          tipo_caso: document.getElementById('inputTipoCaso').value,
           relato: document.getElementById('inputRelato').value,
           foto: document.getElementById('inputFoto').files[0]
         };
@@ -413,6 +430,7 @@
       document.getElementById('inputEdad').value = record.edad || '';
       document.getElementById('inputFecha').value = record.fecha_hecho || '';
       document.getElementById('inputCategoria').value = record.categoria || '';
+      document.getElementById('inputTipoCaso').value = record.tipo_caso || 'Entrega digna';
       document.getElementById('inputRelato').value = record.relato || '';
       // Cannot set input[type=file] value, must leave blank
 

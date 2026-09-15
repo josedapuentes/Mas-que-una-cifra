@@ -54,6 +54,7 @@
         <div class="list-header-cell">Nombre de la persona</div>
         <div class="list-header-cell">Región</div>
         <div class="list-header-cell">Categoría de vida / Rol</div>
+        <div class="list-header-cell">Entrega digna o reencuentro</div>
         <div style="background: transparent;"></div>
       </div>
       
@@ -204,6 +205,7 @@
           <div class="list-cell">${s.nombre_persona}</div>
           <div class="list-cell">${s.region}</div>
           <div class="list-cell">${s.categoria}</div>
+          <div class="list-cell">${s.tipo_caso || 'Entrega digna'}</div>
           <a href="expediente.html?code=${s.codigo_registro}" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem; border-radius: 0; text-decoration: none;">Ver su testimonio</a>
         </div>
       `).join('');

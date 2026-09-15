@@ -72,6 +72,7 @@ const DB = {
           municipio: storyData.municipio,
           fecha_hecho: storyData.fecha || new Date().toISOString().split("T")[0],
           categoria: storyData.categoria,
+          tipo_caso: storyData.tipo_caso || 'Entrega digna',
           relato: storyData.relato,
           foto_url: foto_url,
           estado_verificacion: estado,
@@ -114,6 +115,7 @@ const DB = {
         municipio: storyData.municipio,
         fecha_hecho: storyData.fecha,
         categoria: storyData.categoria,
+        tipo_caso: storyData.tipo_caso,
         relato: storyData.relato,
         ...foto_url_update
       })

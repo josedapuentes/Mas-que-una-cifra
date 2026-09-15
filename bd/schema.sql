@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.registros_historias (
     municipio VARCHAR(100) NOT NULL,
     fecha_hecho DATE NOT NULL,
     categoria VARCHAR(100) NOT NULL, -- e.g., 'Constructor de Paz', 'Líder Social', 'Víctima de Conflicto'
+    tipo_caso VARCHAR(50) NOT NULL DEFAULT 'Entrega digna', -- 'Entrega digna' o 'Reencuentro'
     relato TEXT NOT NULL,
     foto_url TEXT,
     estado_verificacion VARCHAR(50) DEFAULT 'En Proceso', -- 'Verificado', 'En Proceso', 'Archivado'
