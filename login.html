@@ -34,6 +34,10 @@
       </button>
       
       <div id="loginError" style="color: var(--accent-rose); font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 1rem; display: none;"></div>
+      
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="#" onclick="handleResetPassword(event)" style="color: var(--text-primary); font-size: 0.85rem; text-decoration: underline;">¿Olvidaste tu contraseña?</a>
+      </div>
     </form>
     
     <div style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
@@ -88,6 +92,35 @@
         errorDiv.style.display = 'block';
         errorDiv.innerText = 'Error crítico: ' + err.message + '. (¿Estás usando file://?)';
         console.error(err);
+      }
+    }
+
+    async function handleResetPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const errorDiv = document.getElementById('loginError');
+      
+      if (!email) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerText = 'Por favor, ingresa tu correo institucional arriba para recuperar la contraseña.';
+        return;
+      }
+      
+      errorDiv.style.display = 'block';
+      errorDiv.style.color = 'var(--text-secondary)';
+      errorDiv.innerText = 'Enviando correo de recuperación...';
+      
+      const sb = getSupabaseClient();
+      const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/login.html',
+      });
+      
+      if (error) {
+        errorDiv.style.color = 'var(--accent-rose)';
+        errorDiv.innerText = 'Error al enviar recuperación: ' + error.message;
+      } else {
+        errorDiv.style.color = '#39B7B3';
+        errorDiv.innerText = '¡Correo enviado! Revisa la bandeja de entrada de ' + email + ' para reestablecer tu contraseña.';
       }
     }
   </script>
