@@ -98,15 +98,41 @@
         return;
       }
 
+      const tipoCaso = story.tipo_caso || 'Entrega digna';
+      const shareText = `Hola, les quiero contar la historia de ${story.nombre_persona}, persona desaparecida por el conflicto armado en Colombia y que hoy regresó a su familia gracias a un ${tipoCaso}.`;
+      const shareUrl = window.location.href;
+      
+      const twitterShare = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+      const whatsappShare = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+      const facebookShare = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
       container.innerHTML = `
         <div style="max-width: 1000px; margin: 0 auto; padding-top: 2rem; display: flex; gap: 3rem; align-items: flex-start;">
           
-          <!-- Columna Izquierda: Foto -->
-          <div style="width: 320px; flex-shrink: 0; background: #D1D1D1; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-            ${story.foto_url 
-              ? `<img src="${story.foto_url}" alt="Fotografía de ${story.nombre_persona}" style="width: 100%; height: 100%; object-fit: cover; display: block;">`
-              : `<div style="font-weight: bold; color: #000; font-size: 1.5rem;">Fotografía</div>`
-            }
+          <!-- Columna Izquierda: Foto y Botones -->
+          <div style="width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: #D1D1D1; height: 400px; display: flex; align-items: center; justify-content: center;">
+              ${story.foto_url 
+                ? `<img src="${story.foto_url}" alt="Fotografía de ${story.nombre_persona}" style="width: 100%; height: 100%; object-fit: cover; display: block;">`
+                : `<div style="font-weight: bold; color: #000; font-size: 1.5rem;">Fotografía</div>`
+              }
+            </div>
+            
+            <a href="mapa.html" class="btn" style="background-color: #F4A261; color: black; font-weight: 800; padding: 1rem; border-radius: 0; text-decoration: none; text-align: center; font-size: 1.5rem;">Regresar al mapa</a>
+            
+            <div style="text-align: center; color: black; font-size: 1.1rem; font-weight: 500; margin-top: 0.5rem;">Comparte este perfil en redes sociales</div>
+            
+            <div style="display: flex; justify-content: center; gap: 1.5rem; margin-top: 0.5rem;">
+              <a href="${twitterShare}" target="_blank" title="Compartir en X">
+                <img src="img/icon-x.png" alt="X" style="width: 50px; height: 50px; object-fit: contain;">
+              </a>
+              <a href="${whatsappShare}" target="_blank" title="Compartir en WhatsApp">
+                <img src="img/icon-whatsapp.png" alt="WhatsApp" style="width: 50px; height: 50px; object-fit: contain;">
+              </a>
+              <a href="${facebookShare}" target="_blank" title="Compartir en Facebook">
+                <img src="img/icon-facebook.png" alt="Facebook" style="width: 50px; height: 50px; object-fit: contain;">
+              </a>
+            </div>
           </div>
 
           <!-- Columna Derecha: Todo lo demás -->
