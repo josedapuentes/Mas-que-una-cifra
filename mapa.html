@@ -293,7 +293,6 @@
                     color: '#F4A261' // Resalta el borde del departamento en naranja
                   });
                   currentLayer.bringToFront();
-                  markersGroup.bringToFront(); // Ensure points stay on top
                 },
                 mouseout: function(e) {
                   geoJsonLayer.resetStyle(e.target);
@@ -334,6 +333,7 @@
         }
 
         const marker = L.circleMarker(coords, {
+          pane: 'markerPane',
           radius: highlight ? 12 : 8,
           fillColor: highlight ? "#F4A261" : "#F6BE58",
           color: highlight ? "#fff" : "#fff",
