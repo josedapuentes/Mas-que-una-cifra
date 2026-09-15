@@ -358,8 +358,8 @@ body {
 
 .list-header-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr) 180px;
-  gap: 1rem;
+  grid-template-columns: 25% 15% 20% 20% 20%;
+  gap: 0;
 }
 
 .list-header-cell {
@@ -367,13 +367,18 @@ body {
   color: white;
   padding: 1rem;
   font-weight: 700;
+  border-right: 1px solid white;
+}
+.list-header-cell:last-child {
+  border-right: none;
 }
 
 .list-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) minmax(0, 2fr) 180px;
-  gap: 1rem;
+  grid-template-columns: 25% 15% 20% 20% 20%;
+  gap: 0;
   align-items: center;
+  border-bottom: 5px solid white;
 }
 
 .list-cell {
@@ -382,6 +387,10 @@ body {
   padding: 1rem;
   min-height: 50px;
   word-break: break-word;
+  border-right: 1px solid white;
+}
+.list-cell:last-child {
+  border-right: none;
 }
 
 /* Modals */
