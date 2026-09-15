@@ -214,20 +214,72 @@
   <script src="js/db.js"></script>
   <script src="js/auth.js"></script>
   <script>
-    // 1. Diccionario de Coordenadas Aproximadas
-    const MOCK_COORDINATES = {
-      'bogota': [4.7110, -74.0721],
-      'engativa': [4.7110, -74.0721],
-      'chaparral': [3.7225, -75.4851],
-      'tolima': [4.0000, -75.2500],
-      'cali': [3.4516, -76.5320],
-      'valle del cauca': [3.8000, -76.5000],
-      'medellin': [6.2442, -75.5812],
-      'antioquia': [6.5333, -75.3167],
-      'popayan': [2.4382, -76.6132],
-      'cauca': [2.5000, -76.8333],
-      'quibdo': [5.6947, -76.6611],
-      'choco': [5.5000, -76.8333]
+    // 1. Diccionario de Coordenadas Aproximadas (Departamentos y Capitales de Colombia)
+    const COLOMBIA_COORDINATES = {
+      // Amazonas
+      'amazonas': [ -1.4429, -71.5724 ], 'leticia': [ -4.2153, -69.9406 ],
+      // Antioquia
+      'antioquia': [ 6.5333, -75.3167 ], 'medellin': [ 6.2442, -75.5812 ], 'bello': [ 6.3373, -75.5580 ], 'itagui': [ 6.1730, -75.6025 ],
+      // Arauca
+      'arauca': [ 6.5686, -70.7603 ],
+      // Atlantico
+      'atlantico': [ 10.6558, -74.9647 ], 'barranquilla': [ 10.9639, -74.7964 ], 'soledad': [ 10.9184, -74.7646 ],
+      // Bolivar
+      'bolivar': [ 8.9248, -74.3315 ], 'cartagena': [ 10.3997, -75.5144 ],
+      // Boyaca
+      'boyaca': [ 5.5422, -73.3614 ], 'tunja': [ 5.5353, -73.3678 ], 'duitama': [ 5.8239, -73.0333 ], 'sogamoso': [ 5.7142, -72.9333 ],
+      // Caldas
+      'caldas': [ 5.2891, -75.3615 ], 'manizales': [ 5.0689, -75.5174 ],
+      // Caqueta
+      'caqueta': [ 0.8879, -73.8051 ], 'florencia': [ 1.6144, -75.6062 ],
+      // Casanare
+      'casanare': [ 5.3400, -71.6056 ], 'yopal': [ 5.3378, -72.3959 ],
+      // Cauca
+      'cauca': [ 2.4334, -76.6173 ], 'popayan': [ 2.4382, -76.6132 ], 'buenaventura': [ 3.8801, -77.0312 ],
+      // Cesar
+      'cesar': [ 9.3373, -73.4533 ], 'valledupar': [ 10.4742, -73.2436 ],
+      // Choco
+      'choco': [ 5.6919, -76.6582 ], 'quibdo': [ 5.6947, -76.6611 ],
+      // Cordoba
+      'cordoba': [ 8.3517, -75.7011 ], 'monteria': [ 8.7480, -75.8814 ],
+      // Cundinamarca (and Bogota)
+      'cundinamarca': [ 4.7110, -74.0721 ], 'bogota': [ 4.7110, -74.0721 ], 'soacha': [ 4.5781, -74.2144 ], 'engativa': [ 4.7110, -74.0721 ],
+      // Guainia
+      'guainia': [ 2.5000, -68.9500 ], 'inirida': [ 3.8653, -67.9239 ],
+      // Guaviare
+      'guaviare': [ 2.5731, -72.6397 ], 'san jose del guaviare': [ 2.5729, -72.6459 ],
+      // Huila
+      'huila': [ 2.5359, -75.5277 ], 'neiva': [ 2.9273, -75.2819 ],
+      // La Guajira
+      'la guajira': [ 11.5444, -72.9072 ], 'riohacha': [ 11.5444, -72.9072 ], 'guajira': [ 11.5444, -72.9072 ],
+      // Magdalena
+      'magdalena': [ 10.3340, -74.1950 ], 'santa marta': [ 11.2408, -74.1990 ],
+      // Meta
+      'meta': [ 3.2720, -72.9072 ], 'villavicencio': [ 4.1420, -73.6266 ],
+      // Narino
+      'narino': [ 1.5427, -77.9407 ], 'pasto': [ 1.2136, -77.2811 ],
+      // Norte de Santander
+      'norte de santander': [ 7.9048, -72.8466 ], 'cucuta': [ 7.8939, -72.5078 ], 'tibu': [ 8.6397, -72.7358 ],
+      // Putumayo
+      'putumayo': [ 0.4431, -76.0125 ], 'mocoa': [ 1.1523, -76.6508 ],
+      // Quindio
+      'quindio': [ 4.4550, -75.6669 ], 'armenia': [ 4.5339, -75.6811 ],
+      // Risaralda
+      'risaralda': [ 5.1952, -75.9818 ], 'pereira': [ 4.8133, -75.6961 ],
+      // San Andres
+      'san andres': [ 12.5770, -81.7006 ], 'providencia': [ 13.3510, -81.3740 ],
+      // Santander
+      'santander': [ 6.5702, -73.4988 ], 'bucaramanga': [ 7.1193, -73.1227 ], 'barrancabermeja': [ 7.0653, -73.8547 ],
+      // Sucre
+      'sucre': [ 8.9328, -74.9647 ], 'sincelejo': [ 9.3047, -75.3978 ],
+      // Tolima
+      'tolima': [ 4.0000, -75.2500 ], 'ibague': [ 4.4389, -75.2322 ], 'chaparral': [ 3.7225, -75.4851 ],
+      // Valle del Cauca
+      'valle del cauca': [ 3.8000, -76.5000 ], 'cali': [ 3.4516, -76.5320 ], 'palmira': [ 3.5394, -76.3036 ],
+      // Vaupes
+      'vaupes': [ 0.7719, -70.8407 ], 'mitu': [ 1.1983, -70.1733 ],
+      // Vichada
+      'vichada': [ 4.5444, -69.2431 ], 'puerto carreno': [ 6.1890, -67.4893 ]
     };
 
     function normalizeString(str) {
@@ -237,19 +289,40 @@
 
     function getApproximateCoordinates(municipio, region) {
       const normMun = normalizeString(municipio);
-      if (MOCK_COORDINATES[normMun]) return MOCK_COORDINATES[normMun];
-      
-      for (const key in MOCK_COORDINATES) {
-        if (normMun.includes(key)) return MOCK_COORDINATES[key];
+      const normReg = normalizeString(region);
+      let baseCoord = null;
+
+      // Exact or partial match for municipality
+      if (COLOMBIA_COORDINATES[normMun]) {
+        baseCoord = COLOMBIA_COORDINATES[normMun];
+      } else {
+        for (const key in COLOMBIA_COORDINATES) {
+          if (normMun.includes(key)) { baseCoord = COLOMBIA_COORDINATES[key]; break; }
+        }
       }
 
-      const normReg = normalizeString(region);
-      if (MOCK_COORDINATES[normReg]) return MOCK_COORDINATES[normReg];
+      // Fallback to region (exact or partial)
+      if (!baseCoord) {
+        if (COLOMBIA_COORDINATES[normReg]) {
+          baseCoord = COLOMBIA_COORDINATES[normReg];
+        } else {
+          for (const key in COLOMBIA_COORDINATES) {
+            if (normReg.includes(key)) { baseCoord = COLOMBIA_COORDINATES[key]; break; }
+          }
+        }
+      }
 
-      // Random fallback around central Colombia
-      const latOffset = (Math.random() - 0.5) * 2;
-      const lngOffset = (Math.random() - 0.5) * 2;
-      return [4.5709 + latOffset, -74.2973 + lngOffset]; 
+      if (baseCoord) {
+        // Add a tiny random jitter (approx ~5-8km) so multiple pins in the same city don't overlap completely
+        const jitterLat = (Math.random() - 0.5) * 0.08;
+        const jitterLng = (Math.random() - 0.5) * 0.08;
+        return [baseCoord[0] + jitterLat, baseCoord[1] + jitterLng];
+      }
+
+      // If absolutely no match is found, place randomly in Central Colombia
+      const latOffset = Math.random() * 4.0;
+      const lngOffset = Math.random() * 4.0;
+      return [3.0 + latOffset, -76.0 + lngOffset]; 
     }
 
     let allRecords = [];
