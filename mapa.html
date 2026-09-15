@@ -154,6 +154,7 @@
       
       <!-- 30% TEXTO y BUSCADOR -->
       <div style="padding: 3rem 2rem; color: white; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
+        <h1 style="font-family: var(--font-sans); font-size: 2.5rem; margin-bottom: 1rem;">Mapa de la memoria</h1>
         <p style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 2rem;">
           En este mapa interactivo podrás conocer cada una de la entregas dignas o los reencuentros que la Unidad de Búsqueda ha propiciado desde su creación. Cada punto simboliza una historia, una familia que supo lo ocurrido con su ser querido ausente. Un alivio a un dolor provocado por la desaparición.
         </p>
@@ -260,7 +261,7 @@
         zoomControl: false,
         scrollWheelZoom: false,
         dragging: false
-      }).setView([4.5709, -74.2973], 6);
+      }).setView([4.5709, -74.2973], 5); // Zoom 5 para ver todo el país sin cortes
 
       // Agregamos control de zoom en otra posición
       L.control.zoom({ position: 'topright' }).addTo(map);
@@ -279,6 +280,7 @@
               fillOpacity: 1
             }
           }).addTo(map);
+          map.fitBounds(geoJsonLayer.getBounds()); // Ajustar la vista automáticamente al tamaño del mapa
         })
         .catch(err => console.error("Error cargando mapa SVG:", err));
 
@@ -414,8 +416,10 @@
       document.getElementById('mapSearchInput').value = '';
       if (geoJsonLayer) {
         geoJsonLayer.setStyle({ fillColor: '#00908F' });
+        map.fitBounds(geoJsonLayer.getBounds());
+      } else {
+        map.setView([4.5709, -74.2973], 5);
       }
-      map.setView([4.5709, -74.2973], 6);
       plotMarkers(allRecords, null);
     }
   </script>
