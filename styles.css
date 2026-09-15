@@ -381,6 +381,7 @@ body {
   color: #333;
   padding: 1rem;
   min-height: 50px;
+  word-break: break-word;
 }
 
 /* Modals */
