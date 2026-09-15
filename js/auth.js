@@ -115,7 +115,7 @@ const AUTH = {
     const sb = getSupabaseClient();
     const { data: { session } } = await sb.auth.getSession();
     
-    // Si el usuario cambia su propia contraseña
+    // Si el usuario cambia su propia contraseña -> Usa la API nativa de Supabase Auth
     if (session && session.user && session.user.id === userId) {
       const { data, error } = await sb.auth.updateUser({ password: newPassword });
       return { data, error };
@@ -126,6 +126,15 @@ const AUTH = {
       target_user_id: userId,
       new_password: newPassword
     });
+
+    if (error && error.message && error.message.includes('Could not find the function')) {
+      return { 
+        data: null, 
+        error: { 
+          message: 'La función RPC no existe en Supabase aún. Copia y ejecuta el script SQL en el SQL Editor de Supabase.' 
+        } 
+      };
+    }
     
     return { data, error };
   },
