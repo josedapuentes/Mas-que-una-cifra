@@ -27,10 +27,22 @@ const AUTH = {
   login: async (emailOrUsername, password) => {
     const sb = getSupabaseClient();
     
-    // Si no tiene @, asumimos que es un nombre de usuario y le generamos el correo interno
-    let email = emailOrUsername;
+    let email = emailOrUsername.trim();
+
+    // Si no tiene @, asumimos que es un nombre de usuario
+    // Buscamos su correo real en la tabla profiles
     if (!email.includes('@')) {
-      email = `${emailOrUsername.toLowerCase().trim()}@masqueunacifra.local`;
+      const { data: profileData } = await sb
+        .from('profiles')
+        .select('email')
+        .eq('username', email.toLowerCase())
+        .single();
+      
+      if (profileData && profileData.email) {
+        email = profileData.email;
+      } else {
+        return { data: null, error: { message: 'No se encontró un usuario con ese nombre de usuario.' } };
+      }
     }
 
     return await sb.auth.signInWithPassword({
@@ -45,21 +57,61 @@ const AUTH = {
       auth: { storageKey: 'temp_signup_session', persistSession: false }
     });
 
-    const internalEmail = `${username.toLowerCase().trim()}@masqueunacifra.local`;
-    
     const { data, error } = await tempSb.auth.signUp({
-      email: internalEmail,
+      email: realEmail,
       password: password,
       options: {
         data: {
-          username: username,
-          real_email: realEmail,
+          username: username.toLowerCase().trim(),
+          full_name: username,
           role: 'secondary'
         }
       }
     });
+
+    // Después de crear el usuario, guardamos el username y email en profiles
+    if (!error && data.user) {
+      const sb = getSupabaseClient(); // sesión del admin
+      await sb.from('profiles').upsert({
+        id: data.user.id,
+        username: username.toLowerCase().trim(),
+        full_name: username,
+        email: realEmail,
+        role: 'secondary'
+      });
+    }
     
     return { data, error };
+  },
+
+  getAllUsers: async () => {
+    const sb = getSupabaseClient();
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    return { data: data || [], error };
+  },
+
+  updateUser: async (userId, updates) => {
+    const sb = getSupabaseClient();
+    const { data, error } = await sb
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+    return { data, error };
+  },
+
+  deleteUser: async (userId) => {
+    const sb = getSupabaseClient();
+    // Eliminar perfil (el auth user queda huérfano pero no podrá acceder sin perfil)
+    const { error } = await sb
+      .from('profiles')
+      .delete()
+      .eq('id', userId);
+    return { error };
   },
 
   logout: async () => {
@@ -94,7 +146,6 @@ const AUTH = {
       return null;
     }
     
-    // Si hay sesión, intentamos cargar el perfil para obtener el rol real
     const { data: profile } = await AUTH.getUserProfile(session.user.id);
     
     return { 

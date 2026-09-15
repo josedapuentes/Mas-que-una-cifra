@@ -189,21 +189,26 @@
         <header class="section-header">
           <h2>Gestión de Usuarios</h2>
         </header>
-        <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 2rem; background: rgba(0,0,0,0.15); max-width: 600px;">
+
+        <!-- Formulario de Creación -->
+        <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 2rem; background: rgba(0,0,0,0.15); max-width: 600px; margin-bottom: 2rem;">
           <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: #ffffff;">Crear Usuario Secundario</h3>
           <form id="formNewUser" onsubmit="handleCreateUser(event)">
             <div class="form-grid" style="grid-template-columns: 1fr;">
               <div class="form-group">
                 <label for="newUsername">Nombre de Usuario</label>
-                <input type="text" id="newUsername" class="form-control" required placeholder="ej: asesor_1">
+                <input type="text" id="newUsername" class="form-control" required placeholder="ej: asesor_norte" pattern="[a-zA-Z0-9_.]+" title="Solo letras, números, puntos y guiones bajos">
               </div>
               <div class="form-group">
-                <label for="newEmail">Correo Electrónico (opcional)</label>
-                <input type="email" id="newEmail" class="form-control" placeholder="ejemplo@correo.com (Solo para contacto)">
+                <label for="newEmail">Correo Electrónico</label>
+                <input type="email" id="newEmail" class="form-control" required placeholder="ejemplo@correo.com">
               </div>
               <div class="form-group">
                 <label for="newPassword">Contraseña</label>
-                <input type="password" id="newPassword" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
+                <div style="position: relative;">
+                  <input type="password" id="newPassword" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres" style="padding-right: 3rem;">
+                  <button type="button" onclick="togglePasswordVisibility('newPassword', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--text-muted);" title="Ver contraseña">👁️</button>
+                </div>
               </div>
             </div>
             
@@ -213,6 +218,27 @@
               <button type="submit" id="btnCreateUser" class="btn btn-primary">Crear Usuario</button>
             </div>
           </form>
+        </div>
+
+        <!-- Tablero de Usuarios Existentes -->
+        <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 2rem; background: rgba(0,0,0,0.15);">
+          <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem; color: #ffffff;">Usuarios Registrados</h3>
+          <div id="usersTableContainer" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border-subtle); color: var(--text-secondary); text-align: left;">
+                  <th style="padding: 0.75rem;">Nombre</th>
+                  <th style="padding: 0.75rem;">Usuario</th>
+                  <th style="padding: 0.75rem;">Correo</th>
+                  <th style="padding: 0.75rem;">Rol</th>
+                  <th style="padding: 0.75rem; text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">Cargando usuarios...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
       
@@ -268,6 +294,10 @@
 
       if (secId === 'new_record' && !editingRecordId) {
         resetForm();
+      }
+
+      if (secId === 'users') {
+        loadUsersTable();
       }
     }
 
@@ -532,8 +562,15 @@
       const btn = document.getElementById('btnCreateUser');
       const feedback = document.getElementById('userFeedback');
       const username = document.getElementById('newUsername').value;
-      const email = document.getElementById('newEmail').value || null;
+      const email = document.getElementById('newEmail').value;
       const password = document.getElementById('newPassword').value;
+
+      if (!email) {
+        feedback.style.display = 'block';
+        feedback.style.color = 'var(--accent-rose)';
+        feedback.innerText = 'El correo electrónico es obligatorio.';
+        return;
+      }
 
       btn.disabled = true;
       btn.innerText = 'Creando...';
@@ -550,10 +587,109 @@
         feedback.innerText = 'Error al crear usuario: ' + res.error.message;
       } else {
         feedback.style.display = 'block';
-        feedback.style.color = '#10b981'; // green
-        feedback.innerText = 'Usuario secundario creado exitosamente.';
+        feedback.style.color = '#10b981';
+        feedback.innerText = '✅ Usuario "' + username + '" creado exitosamente. Puede ingresar con su nombre de usuario o correo.';
         document.getElementById('formNewUser').reset();
         showToast('Usuario creado correctamente');
+        loadUsersTable(); // Refrescar tabla
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+        btn.title = 'Ocultar contraseña';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+        btn.title = 'Ver contraseña';
+      }
+    }
+
+    async function loadUsersTable() {
+      const tbody = document.getElementById('usersTableBody');
+      if (!tbody) return;
+
+      const { data: users, error } = await AUTH.getAllUsers();
+
+      if (error || !users.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">No se encontraron usuarios.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        const isCurrentUser = u.id === currentUserProfile.id;
+        const rolLabel = u.role === 'admin' ? 'Administrador' : 'Secundario';
+        const rolColor = u.role === 'admin' ? '#F4A261' : '#10b981';
+
+        return `
+          <tr style="border-bottom: 1px solid var(--border-subtle);" id="userRow_${u.id}">
+            <td style="padding: 0.75rem; color: var(--text-primary);">${u.full_name || '—'}</td>
+            <td style="padding: 0.75rem; color: var(--text-secondary);">${u.username || '—'}</td>
+            <td style="padding: 0.75rem; color: var(--text-secondary);">${u.email || '—'}</td>
+            <td style="padding: 0.75rem;">
+              <span style="background: ${rolColor}22; color: ${rolColor}; padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${rolLabel}</span>
+            </td>
+            <td style="padding: 0.75rem; text-align: center;">
+              ${isCurrentUser ? '<span style="color: var(--text-muted); font-size: 0.8rem;">Tú</span>' : `
+                <button onclick="editUser('${u.id}', '${(u.full_name || '').replace(/'/g, "\\'")}', '${(u.username || '').replace(/'/g, "\\'")}', '${(u.email || '').replace(/'/g, "\\'")}', '${u.role}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Editar">✏️</button>
+                <button onclick="confirmDeleteUser('${u.id}', '${(u.full_name || u.username || '').replace(/'/g, "\\'")}')" style="background: none; border: none; cursor: pointer; font-size: 1rem; margin: 0 0.25rem;" title="Eliminar">🗑️</button>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function editUser(id, fullName, username, email, role) {
+      const row = document.getElementById('userRow_' + id);
+      if (!row) return;
+
+      row.innerHTML = `
+        <td style="padding: 0.5rem;"><input type="text" id="editName_${id}" value="${fullName}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
+        <td style="padding: 0.5rem;"><input type="text" id="editUsername_${id}" value="${username}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
+        <td style="padding: 0.5rem;"><input type="email" id="editEmail_${id}" value="${email}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;"></td>
+        <td style="padding: 0.5rem;">
+          <select id="editRole_${id}" class="form-control" style="padding: 0.4rem; font-size: 0.85rem;">
+            <option value="secondary" ${role === 'secondary' ? 'selected' : ''}>Secundario</option>
+            <option value="admin" ${role === 'admin' ? 'selected' : ''}>Administrador</option>
+          </select>
+        </td>
+        <td style="padding: 0.5rem; text-align: center;">
+          <button onclick="saveUser('${id}')" style="background: #10b981; color: white; border: none; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; margin: 0 0.15rem;">Guardar</button>
+          <button onclick="loadUsersTable()" style="background: var(--text-muted); color: white; border: none; cursor: pointer; padding: 0.3rem 0.7rem; border-radius: 4px; font-size: 0.8rem; margin: 0 0.15rem;">Cancelar</button>
+        </td>
+      `;
+    }
+
+    async function saveUser(id) {
+      const updates = {
+        full_name: document.getElementById('editName_' + id).value,
+        username: document.getElementById('editUsername_' + id).value.toLowerCase().trim(),
+        email: document.getElementById('editEmail_' + id).value,
+        role: document.getElementById('editRole_' + id).value
+      };
+
+      const { error } = await AUTH.updateUser(id, updates);
+      if (error) {
+        showToast('Error al actualizar: ' + error.message);
+      } else {
+        showToast('Usuario actualizado correctamente');
+        loadUsersTable();
+      }
+    }
+
+    async function confirmDeleteUser(id, name) {
+      if (confirm(`¿Estás seguro de eliminar al usuario "${name}"? Esta acción no se puede deshacer.`)) {
+        const { error } = await AUTH.deleteUser(id);
+        if (error) {
+          showToast('Error al eliminar: ' + error.message);
+        } else {
+          showToast('Usuario eliminado correctamente');
+          loadUsersTable();
+        }
       }
     }
 
