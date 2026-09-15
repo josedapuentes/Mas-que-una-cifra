@@ -61,6 +61,7 @@
       <div id="storiesGrid" style="display: flex; flex-direction: column; gap: 1rem;">
         <!-- Renderizado dinámico vía JS -->
       </div>
+      <div id="paginationContainer" style="text-align: center; margin-top: 2rem; font-weight: bold; color: black; font-size: 1.1rem;"></div>
       
       <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
         <a href="historias.html" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 4px; text-decoration: none;">Ver todas las historias</a>
@@ -185,22 +186,30 @@
     }
     function closeModal() { document.getElementById('storyModal').classList.remove('active'); }
 
-    async function renderStories() {
+    let currentPage = 1;
+    const ITEMS_PER_PAGE = 10;
+    
+    async function renderStories(resetPage = true) {
+      if (resetPage) currentPage = 1;
       const res = await DB.fetchRecords();
       if (!res.ok) return;
       
       const stories = res.data;
-      const search = document.getElementById('searchInput').value.toLowerCase();
+      const searchInput = document.getElementById('searchInput');
+      const search = searchInput ? searchInput.value.toLowerCase() : '';
       
       const filtered = stories.filter(s => {
         const matchSearch = (s.nombre_persona + ' ' + s.municipio + ' ' + s.codigo_registro + ' ' + s.relato + ' ' + s.categoria).toLowerCase().includes(search);
         return matchSearch;
       });
 
+      const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const pageItems = filtered.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
       const grid = document.getElementById('storiesGrid');
-      const homeStories = filtered.slice(0, 4);
       
-      grid.innerHTML = homeStories.map(s => `
+      grid.innerHTML = pageItems.map(s => `
         <div class="list-row">
           <div class="list-cell">${s.nombre_persona}</div>
           <div class="list-cell">${s.region}</div>
@@ -209,6 +218,31 @@
           <a href="expediente.html?code=${s.codigo_registro}" class="btn" style="background-color: #F4A261; color: black; font-weight: bold; padding: 1rem; border-radius: 0; text-decoration: none;">Ver su testimonio</a>
         </div>
       `).join('');
+
+      const paginationContainer = document.getElementById('paginationContainer');
+      if (paginationContainer) {
+        if (totalPages > 1) {
+          let pagesHtml = ['Página '];
+          for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage) {
+              pagesHtml.push(`<span style="margin: 0 5px; cursor: default;">${i}</span>`);
+            } else {
+              pagesHtml.push(`<a href="#" onclick="event.preventDefault(); window.goToPage(${i})" style="margin: 0 5px; color: black; text-decoration: none;">${i}</a>`);
+            }
+            if (i < totalPages) pagesHtml.push(' | ');
+          }
+          paginationContainer.innerHTML = pagesHtml.join('');
+        } else {
+          paginationContainer.innerHTML = '';
+        }
+      }
+    }
+    
+    window.goToPage = function(page) {
+      currentPage = page;
+      renderStories(false);
+      // Opcional: hacer scroll hacia arriba de la tabla si hay muchos items
+      document.querySelector('.list-layout').scrollIntoView({ behavior: 'smooth' });
     }
     
     function searchAndRedirect() {
