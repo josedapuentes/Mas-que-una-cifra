@@ -263,7 +263,8 @@
       map = L.map('map', { 
         zoomControl: false,
         scrollWheelZoom: false,
-        dragging: false
+        dragging: false,
+        zoomSnap: 0
       }).setView([4.5709, -74.2973], 5); // Zoom 5 para ver todo el país sin cortes
 
       // Agregamos control de zoom en otra posición
@@ -307,7 +308,7 @@
             }
           }).addTo(map);
           map.invalidateSize();
-          map.fitBounds(geoJsonLayer.getBounds()); // Ajustar la vista automáticamente al tamaño del mapa
+          map.fitBounds(geoJsonLayer.getBounds(), { padding: [0, 0] }); // Ajustar la vista automáticamente al tamaño del mapa
         })
         .catch(err => console.error("Error cargando mapa SVG:", err));
 
@@ -443,7 +444,7 @@
       document.getElementById('mapSearchInput').value = '';
       if (geoJsonLayer) {
         geoJsonLayer.setStyle({ fillColor: '#00908F' });
-        map.fitBounds(geoJsonLayer.getBounds());
+        map.fitBounds(geoJsonLayer.getBounds(), { padding: [0, 0] });
       } else {
         map.setView([4.5709, -74.2973], 5);
       }
