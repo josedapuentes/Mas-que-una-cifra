@@ -358,7 +358,7 @@ body {
 
 .list-header-row {
   display: grid;
-  grid-template-columns: 25% 15% 20% 20% 20%;
+  grid-template-columns: 22% 20% 20% 20% 18%;
   gap: 0;
 }
 
@@ -375,7 +375,7 @@ body {
 
 .list-row {
   display: grid;
-  grid-template-columns: 25% 15% 20% 20% 20%;
+  grid-template-columns: 22% 20% 20% 20% 18%;
   gap: 0;
   align-items: center;
   border-bottom: 5px solid white;
