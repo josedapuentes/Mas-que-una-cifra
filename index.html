@@ -48,6 +48,33 @@
       </div>
     </section>
 
+    <!-- Texto Introductorio y Glosario -->
+    <section style="margin: 2rem auto; max-width: 900px; text-align: center; color: white; font-size: 1.2rem; line-height: 1.5; font-family: var(--font-sans);">
+      A continuación vas a encontrar un listado de historias sobre las personas que fueron reportadas como desaparecidas ante la Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD) en el marco del conflicto armado y que hoy ya fueron 
+      <span class="glosario-link" onclick="openGlosarioModal('modalEntrega')">entregadas dignamente</span> 
+      o lograron el 
+      <span class="glosario-link" onclick="openGlosarioModal('modalReencuentro')">reencuentro</span> 
+      con sus familiares.
+    </section>
+
+    <!-- Modales de Glosario -->
+    <div id="modalEntrega" class="glosario-modal-overlay" onclick="closeGlosarioModal('modalEntrega')">
+      <div class="glosario-modal-content" onclick="event.stopPropagation()">
+        <button class="glosario-close-btn" onclick="closeGlosarioModal('modalEntrega')">X</button>
+        <h3>¿Qué es una entrega digna?</h3>
+        <p>Según la Unidad de Búsqueda de Personas dadas por Desaparecidas (UBPD), una entrega digna es el proceso humanitario, extrajudicial y reparador mediante el cual se restituyen los restos mortales de una persona identificada a sus familiares o personas legitimadas para recibirlo. No se trata de un simple trámite administrativo o forense, sino de una ceremonia solemne que se planea y realiza atendiendo a las necesidades particulares, el ritmo y las condiciones de las víctimas que buscan. En este espacio, se respetan profundamente las tradiciones culturales, espirituales y religiosas de las familias, y el acto puede llevarse a cabo de manera individual o colectiva según lo que se haya concertado con ellas.</p>
+        <p>El propósito fundamental de la entrega digna es contribuir al alivio del sufrimiento y responder a la satisfacción del derecho a la verdad y la reparación de quienes han buscado a sus seres queridos, muchas veces durante décadas. Para ello, la UBPD coordina un riguroso acompañamiento psicosocial y logístico, a menudo en articulación con otras entidades del Sistema Integral para la Paz (como la JEP o la Unidad para las Víctimas). Este proceso integral garantiza que las familias puedan dignificar la memoria de su familiar, recibir respuestas concretas sobre lo sucedido y brindarle, finalmente, una despedida acorde a sus creencias y costumbres.</p>
+      </div>
+    </div>
+
+    <div id="modalReencuentro" class="glosario-modal-overlay" onclick="closeGlosarioModal('modalReencuentro')">
+      <div class="glosario-modal-content" onclick="event.stopPropagation()">
+        <button class="glosario-close-btn" onclick="closeGlosarioModal('modalReencuentro')">X</button>
+        <h3>¿Qué es un reencuentro?</h3>
+        <p>En el contexto del mandato de la UBPD, un reencuentro es el hito que se produce cuando, como resultado del proceso de búsqueda humanitaria, se localiza con vida a una persona dada por desaparecida y se facilita la unión con su familia, allegados o comunidad de origen. Este escenario se rige bajo la estricta voluntad y el consentimiento de la persona encontrada viva, garantizando sus condiciones de seguridad y respetando su autonomía frente a la información que desee o no compartir durante el proceso. La UBPD no impone una única guía rígida para llevar a cabo este acto; por el contrario, la preparación del reencuentro surge de conversaciones previas para entender y acatar las particularidades de lo que la familia y la persona localizada necesitan como elemento reparador.</p>
+        <p>Más allá del evento físico de volver a verse tras años o décadas de ausencia a causa del conflicto armado, el reencuentro representa un momento de profunda sanación emocional y de reconstrucción del tejido social. Este espacio cuenta con toda la logística y el acompañamiento psicosocial por parte de los equipos territoriales de la UBPD para asegurar que se desarrolle en un entorno de absoluta confianza. De esta manera, el reencuentro logra poner fin a la incertidumbre y al flagelo de la desaparición, permitiendo a las familias abrazarse de nuevo, reconstruir su historia (como su árbol genealógico) y comenzar un nuevo ciclo en sus vidas.</p>
+      </div>
+    </div>
     <!-- Galería Dinámica de Expedientes (Tabla Figma) -->
     <section class="list-layout">
       <div class="list-header-row" style="margin-bottom: 1rem;">
@@ -344,6 +371,18 @@
           });
         }
       });
+    }
+    // Funciones para Modales de Glosario
+    function openGlosarioModal(id) {
+      document.getElementById(id).style.display = 'flex';
+      // Bloquear scroll del fondo
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeGlosarioModal(id) {
+      document.getElementById(id).style.display = 'none';
+      // Restaurar scroll del fondo
+      document.body.style.overflow = '';
     }
   </script>
 </body>

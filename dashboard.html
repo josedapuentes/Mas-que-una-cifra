@@ -32,7 +32,7 @@
         <ul>
           <li><a href="#" class="sidebar-link" onclick="showSection('records')">📋 Consultar Registros</a></li>
           <li><a href="#" class="sidebar-link active" onclick="showSection('new_record')">➕ Nuevo Expediente</a></li>
-          <li id="navAdmin" style="display: none;"><a href="#" class="sidebar-link" onclick="showSection('admin_stats')">📈 Estadísticas Globales</a></li>
+          <li id="navStats"><a href="#" class="sidebar-link" onclick="showSection('admin_stats')">📈 Estadísticas Globales</a></li>
           <li id="navUsers" style="display: none;"><a href="#" class="sidebar-link" onclick="showSection('users')">👥 Gestión de Usuarios</a></li>
         </ul>
       </nav>
@@ -272,7 +272,6 @@
 
       // Mostrar menús de admin si aplica
       if (currentUserProfile.role === 'admin') {
-        document.getElementById('navAdmin').style.display = 'block';
         document.getElementById('navUsers').style.display = 'block';
       }
 
@@ -319,9 +318,7 @@
       allRecords = data;
       renderTable(allRecords);
 
-      if (currentUserProfile && currentUserProfile.role === 'admin') {
-        renderAdminStats(allRecords);
-      }
+      renderAdminStats(allRecords);
     }
 
     function renderAdminStats(records) {
@@ -394,7 +391,7 @@
 
       const brandColors = ['#9878BE', '#39B7B3', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#264653', '#e9c46a'];
 
-      createChart('chartRegion', 'pie', dataRegion, 'Regiones', brandColors);
+      createChart('chartRegion', 'bar', dataRegion, 'Regiones', brandColors[2]);
       createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
       createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
       createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);

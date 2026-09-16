@@ -196,6 +196,12 @@
           <canvas id="chartCategoria"></canvas>
         </div>
       </div>
+      <div class="modal-card" style="box-shadow: none; border: 1px solid var(--border-subtle); padding: 1.5rem; background: #5a4181;">
+        <h3 style="font-size: 14px; margin-bottom: 1rem; color: #ffffff; text-align: center;">Tipo de caso</h3>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="chartTipoCaso"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- BOTONES -->
@@ -480,6 +486,7 @@
       const dataMunicipio = countBy(records, 'municipio');
       const dataEdad = countAges(records);
       const dataCategoria = countBy(records, 'categoria');
+      const dataTipoCaso = countBy(records, 'tipo_caso');
 
       const createChart = (canvasId, type, dataObj, label, colors) => {
         if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
@@ -516,10 +523,11 @@
 
       const brandColors = ['#9878BE', '#39B7B3', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A'];
 
-      createChart('chartRegion', 'pie', dataRegion, 'Regiones', brandColors);
+      createChart('chartRegion', 'bar', dataRegion, 'Regiones', brandColors[2]);
       createChart('chartMunicipio', 'bar', dataMunicipio, 'Municipios', brandColors[1]);
-      createChart('chartEdad', 'doughnut', dataEdad, 'Edades', brandColors);
-      createChart('chartCategoria', 'bar', dataCategoria, 'Categorías', brandColors[0]);
+      createChart('chartEdad', 'doughnut', dataEdad, 'Rango de Edad', brandColors);
+      createChart('chartCategoria', 'bar', dataCategoria, 'Categoría', brandColors[0]);
+      createChart('chartTipoCaso', 'pie', dataTipoCaso, 'Tipo de caso', brandColors);
     }
     function searchMapProfile() {
       const query = document.getElementById('mapSearchInput').value.toLowerCase().trim();

@@ -54,6 +54,22 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.registros_historias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.todos ENABLE ROW LEVEL SECURITY;
 
+-- Políticas de lectura/escritura para perfiles
+CREATE POLICY "Permitir lectura de perfiles" 
+ON public.profiles FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Admin puede insertar perfiles" 
+ON public.profiles FOR INSERT TO authenticated 
+WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+
+CREATE POLICY "Admin puede actualizar perfiles" 
+ON public.profiles FOR UPDATE TO authenticated 
+USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+
+CREATE POLICY "Admin puede eliminar perfiles" 
+ON public.profiles FOR DELETE TO authenticated 
+USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+
 -- Política de lectura pública para historias (Transparencia e Impacto)
 CREATE POLICY "Lectura pública de historias" 
 ON public.registros_historias FOR SELECT 
