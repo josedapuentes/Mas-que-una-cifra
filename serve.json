@@ -2,9 +2,14 @@
   "cleanUrls": false,
   "directoryListing": false,
   "rewrites": [
-    {
-      "source": "/",
-      "destination": "/index.html"
-    }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/estadisticas", "destination": "/estadisticas.html" },
+    { "source": "/expediente", "destination": "/expediente.html" },
+    { "source": "/historias", "destination": "/historias.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/mapa", "destination": "/mapa.html" },
+    { "source": "/oacp", "destination": "/oacp.html" }
   ]
 }
