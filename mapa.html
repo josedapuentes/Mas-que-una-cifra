@@ -505,6 +505,7 @@
             }]
           },
           options: {
+            indexAxis: type === 'bar' ? 'y' : 'x',
             responsive: true,
             maintainAspectRatio: false,
             plugins: { 
@@ -514,8 +515,8 @@
               } 
             },
             scales: type === 'bar' ? { 
-              y: { beginAtZero: true, ticks: { precision: 0, color: '#ffffff', font: { size: 18 } } },
-              x: { ticks: { color: '#ffffff', font: { size: 18 }, maxRotation: 90, minRotation: 90 } }
+              x: { beginAtZero: true, ticks: { precision: 0, color: '#ffffff', font: { size: 14 } } },
+              y: { ticks: { color: '#ffffff', font: { size: 14 } } }
             } : {}
           }
         });
